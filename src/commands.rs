@@ -118,6 +118,12 @@ fn cmd_drop(target: &str, state: &mut GameState) -> String {
 }
 
 fn cmd_examine(target: &str, state: &GameState) -> String {
+    // "examine room" / "examine surroundings" acts as LOOK
+    match target {
+        "room" | "around" | "surroundings" | "area" | "here" => return cmd_look(state),
+        _ => {}
+    }
+
     // Check inventory first, then current room
     let item_id = state
         .inventory
