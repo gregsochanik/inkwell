@@ -1,5 +1,8 @@
 use crate::game_state::{Command, Direction, GameState, ItemId};
 
+/// Maximum number of items a hobbit can carry.
+const MAX_INVENTORY: usize = 4;
+
 /// Check if any item in a list matches the target string by id or name.
 fn item_matches_any(items: &[ItemId], target: &str, state: &GameState) -> bool {
     items.iter().any(|&item_id| {
@@ -142,6 +145,11 @@ fn cmd_glance(state: &GameState) -> String {
 }
 
 fn cmd_take(target: &str, state: &mut GameState) -> String {
+    // Check inventory capacity
+    if state.inventory.len() >= MAX_INVENTORY {
+        return "Your pockets are full! You'll need to drop something first.".to_string();
+    }
+
     // Find an item in the current room whose id or name contains the target string
     let found_item_id = {
         let room = state.current_room();
@@ -240,7 +248,11 @@ fn cmd_inventory(state: &GameState) -> String {
     if state.inventory.is_empty() {
         "You are carrying nothing.".to_string()
     } else {
-        let mut text = "You are carrying:".to_string();
+        let mut text = format!(
+            "You are carrying ({}/{}):",
+            state.inventory.len(),
+            MAX_INVENTORY
+        );
         for &item_id in &state.inventory {
             if let Some(item) = state.items.get(item_id) {
                 text.push_str(&format!("\n  {}", item.name));
