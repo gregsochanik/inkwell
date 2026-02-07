@@ -61,9 +61,20 @@ fn cmd_go(dir_str: &str, state: &mut GameState) -> String {
     };
 
     state.current_room = next_room_id;
-    cmd_look(state)
+
+    // First visit: show full description and mark visited.
+    // Revisit: show short description.
+    let first_visit = !state.visited_rooms.contains(next_room_id);
+    state.visited_rooms.insert(next_room_id);
+
+    if first_visit {
+        cmd_look(state)
+    } else {
+        cmd_glance(state)
+    }
 }
 
+/// Full room description (used by LOOK command and first visit).
 fn cmd_look(state: &GameState) -> String {
     let room = state.current_room();
     let desc = if room.items.is_empty() {
@@ -74,6 +85,37 @@ fn cmd_look(state: &GameState) -> String {
     let mut text = format!("\n--- {} ---\n{}", room.name, desc);
 
     // List items on the ground
+    if !room.items.is_empty() {
+        text.push_str("\n\nYou can see:");
+        for &item_id in &room.items {
+            if let Some(item) = state.items.get(item_id) {
+                text.push_str(&format!("\n  {}", item.name));
+            }
+        }
+    }
+
+    // List exits in canonical N, S, E, W order
+    let mut exit_dirs: Vec<&Direction> = room.exits.keys().collect();
+    exit_dirs.sort_by_key(|d| match d {
+        Direction::North => 0,
+        Direction::South => 1,
+        Direction::East => 2,
+        Direction::West => 3,
+    });
+    let exits: Vec<&str> = exit_dirs.iter().map(|d| d.name()).collect();
+    if !exits.is_empty() {
+        text.push_str(&format!("\n\nExits: {}", exits.join(", ")));
+    }
+
+    text
+}
+
+/// Short room description (used on revisit when navigating).
+fn cmd_glance(state: &GameState) -> String {
+    let room = state.current_room();
+    let mut text = format!("\n--- {} ---\n{}", room.name, room.short_description);
+
+    // Still list items on the ground
     if !room.items.is_empty() {
         text.push_str("\n\nYou can see:");
         for &item_id in &room.items {

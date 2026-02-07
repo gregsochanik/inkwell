@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use crate::game_state::{Direction, GameState, Item, Room};
 
@@ -20,6 +20,7 @@ pub fn build_world() -> GameState {
                  leads outside. The walls are lined with shelves full of books, \
                  pantry jars, and maps. A warm fire crackles in the hearth. \
                  There is a strong smell of seed-cake.",
+            short_description: "You are back in the cosy comfort of Bag End.",
             description_when_empty: None,
             exits: bag_end_exits,
             items: vec!["map"],
@@ -40,6 +41,7 @@ pub fn build_world() -> GameState {
                  wide and blue. Bag End is behind you to the west. A winding \
                  path leads south toward a cheerful inn, and east toward dark \
                  woods.",
+            short_description: "You stand on the Hill, overlooking the Shire.",
             description_when_empty: None,
             exits: hill_exits,
             items: vec![],
@@ -58,6 +60,7 @@ pub fn build_world() -> GameState {
                  ale and smoking pipe-weed. A stout barkeep polishes mugs \
                  behind the counter. Songs drift from a corner table. The door \
                  leads back north to the Hill.",
+            short_description: "You are in the warm and noisy Green Dragon Inn.",
             description_when_empty: None,
             exits: inn_exits,
             items: vec!["elven_bread"],
@@ -77,6 +80,7 @@ pub fn build_world() -> GameState {
                  overgrown. Strange sounds echo between the trunks. You feel \
                  distinctly unwelcome here. The way continues east, or you \
                  can retreat west.",
+            short_description: "You are in the dim depths of Trollshaw Forest.",
             description_when_empty: None,
             exits: trollshaw_exits,
             items: vec!["sword"],
@@ -96,6 +100,7 @@ pub fn build_world() -> GameState {
                  Three large stone shapes loom in the centre — the remains \
                  of trolls turned to stone at dawn. A faint path leads north \
                  toward distant waterfalls.",
+            short_description: "You are in the Troll Clearing. Stone trolls loom nearby.",
             description_when_empty: None,
             exits: troll_exits,
             items: vec!["key"],
@@ -115,6 +120,7 @@ pub fn build_world() -> GameState {
                  music drifts on the breeze. Waterfalls cascade into crystal \
                  pools below. You feel rested and safe — for now. A steep \
                  path climbs east into the mountains.",
+            short_description: "You are in Rivendell. Elven music drifts on the breeze.",
             description_when_empty: None,
             exits: rivendell_exits,
             items: vec![],
@@ -134,6 +140,7 @@ pub fn build_world() -> GameState {
                  and snow stings your face. Thunder rumbles in the distance. \
                  The path is treacherous. A dark crack in the rock leads east \
                  into the mountain itself.",
+            short_description: "You are on the treacherous Misty Mountains Pass.",
             description_when_empty: None,
             exits: misty_exits,
             items: vec![],
@@ -151,6 +158,7 @@ pub fn build_world() -> GameState {
                 "A damp, dark cave deep inside the mountain. Water drips from \
                  the ceiling and the air smells foul. Strange eyes glint in \
                  the darkness. On the floor, something glimmers faintly.",
+            short_description: "You are in the dark Goblin Cave. Water drips around you.",
             description_when_empty: Some(
                 "A damp, dark cave deep inside the mountain. Water drips from \
                  the ceiling and the air smells foul. Strange eyes glint in \
@@ -222,11 +230,15 @@ pub fn build_world() -> GameState {
         },
     );
 
+    let mut visited_rooms = HashSet::new();
+    visited_rooms.insert("bag_end");
+
     GameState {
         rooms,
         items,
         current_room: "bag_end",
         inventory: Vec::new(),
+        visited_rooms,
         running: true,
     }
 }

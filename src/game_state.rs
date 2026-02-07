@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 /// Cardinal directions for navigation.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -39,6 +39,8 @@ pub struct Room {
     pub id: RoomId,
     pub name: &'static str,
     pub description: &'static str,
+    /// Short description shown on revisit (when navigating back).
+    pub short_description: &'static str,
     /// Alternate description shown when all original items have been taken.
     pub description_when_empty: Option<&'static str>,
     pub exits: HashMap<Direction, RoomId>,
@@ -73,6 +75,7 @@ pub struct GameState {
     pub items: HashMap<ItemId, Item>,
     pub current_room: RoomId,
     pub inventory: Vec<ItemId>,
+    pub visited_rooms: HashSet<RoomId>,
     pub running: bool,
 }
 
