@@ -1,4 +1,24 @@
-use crate::game_state::{Command, Direction, GameState};
+use crate::game_state::{Command, Direction, GameState, ItemId};
+
+/// Check if any item in a list matches the target string by id or name.
+fn item_matches_any(items: &[ItemId], target: &str, state: &GameState) -> bool {
+    items.iter().any(|&item_id| {
+        let matches_id = item_id.contains(target);
+        let matches_name = state
+            .items
+            .get(item_id)
+            .map(|i| i.name.to_lowercase().contains(target))
+            .unwrap_or(false);
+        matches_id || matches_name
+    })
+}
+
+/// Check if a target string matches any known item in the game.
+fn item_exists_in_world(target: &str, state: &GameState) -> bool {
+    state.items.values().any(|item| {
+        item.id.contains(target) || item.name.to_lowercase().contains(target)
+    })
+}
 
 /// Execute a parsed command against the game state, returning the text to display.
 pub fn execute(cmd: &Command, state: &mut GameState) -> String {
@@ -98,7 +118,17 @@ fn cmd_take(target: &str, state: &mut GameState) -> String {
             let name = state.items.get(item_id).map(|i| i.name).unwrap_or(item_id);
             format!("You pick up {}.", name)
         }
-        None => format!("You don't see '{}' here.", target),
+        None => {
+            // Check if already carrying it
+            let in_inventory = item_matches_any(&state.inventory, target, state);
+            if in_inventory {
+                "You're already carrying that!".to_string()
+            } else if item_exists_in_world(target, state) {
+                format!("You don't see '{}' here.", target)
+            } else {
+                format!("I don't know what '{}' is.", target)
+            }
+        }
     }
 }
 
