@@ -36,8 +36,19 @@ pub fn parse(input: &str) -> Command {
             Command::Go(verb.to_string())
         }
 
-        // Looking
-        "look" | "l" => Command::Look,
+        // Looking — "look" alone shows the room, "look at X" examines an item
+        "look" | "l" => {
+            if let Some(target) = rest.strip_prefix("at ") {
+                let target = strip_articles(target);
+                if target.is_empty() {
+                    Command::Look
+                } else {
+                    Command::Examine(target.to_string())
+                }
+            } else {
+                Command::Look
+            }
+        }
 
         // Examine
         "examine" | "x" | "inspect" => {
