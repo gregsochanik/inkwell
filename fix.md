@@ -168,6 +168,163 @@ No blank line between "Exits: east" and the idle text.
 
 ---
 
+---
+
+## Iteration 3 — Puzzles & Win Condition
+
+Tested: Troll encounter puzzle (alive/stone descriptions, north blocked, WAIT
+solve, ATTACK death, key reveal, revisit), riddle game with Gollum (start,
+all 3 riddles correct, wrong answer death, QUIT during riddle, post-win state,
+Gollum removal), USE command (all 5 items with/without inventory, context at
+Lonely Mountain), win condition (map+key=win, key without map, map without key),
+death states (attack trolls, attack Gollum, wrong riddle), new rooms (Beorn's
+Hall, Lake-town, Lonely Mountain — descriptions, exits, navigation back/forth),
+new command aliases (WAIT/Z, ATTACK/FIGHT/KILL/HIT/STAB, RIDDLE, PLAY RIDDLE,
+UNLOCK), HELP text, integration with existing items/NPCs/navigation.
+
+### Bugs
+
+#### BUG-9: `examine trolls` says "You don't see 'trolls' here" even though trolls are in the room
+
+**Steps to reproduce:**
+```
+(in Troll Clearing, trolls alive)
+> examine trolls
+You don't see 'trolls' here.
+
+> examine troll
+You don't see 'troll' here.
+
+(after trolls turned to stone)
+> examine trolls
+You don't see 'trolls' here.
+```
+
+**Expected:** A description of the trolls — alive ("Three enormous trolls
+argue around a fire...") or stone ("Three stone shapes, frozen mid-argument").
+Trolls are described in the room text but can't be examined because they
+aren't items or NPCs.
+
+**Severity:** Medium — the trolls are the central feature of the room and
+players will naturally try to examine them.
+
+---
+
+#### BUG-10: Generic ATTACK response has hardcoded "the" before target name
+
+**Code:**
+```rust
+format!("You wave your sword at the {}. Nothing much happens.", target)
+```
+
+For `attack gandalf` this produces: "You wave your sword at the gandalf."
+The hardcoded "the" is grammatically wrong for proper nouns.
+
+**Expected:** Either drop "the" or use context-aware grammar.
+
+**Severity:** Low — only triggers for non-lethal attacks with a sword.
+
+---
+
+#### BUG-11: Goblin Cave description still mentions "Strange eyes" after Gollum leaves
+
+**Steps to reproduce:**
+```
+(in Goblin Cave, after winning riddle game — Gollum has left)
+> take ring
+> look
+A damp, dark cave... Strange eyes glint in the darkness.
+The floor is bare rock, slick with moisture.
+```
+
+**Expected:** After Gollum leaves, the "Strange eyes" reference should be
+removed. The `description_when_empty` text still contains this phrase even
+though it refers to Gollum.
+
+**Severity:** Low — cosmetic inconsistency, though a sharp player will notice.
+
+---
+
+### Feature Improvements
+
+#### IMP-15: Room scenery cannot be examined
+
+Players can only examine items and NPCs. Room elements described in the text
+(trolls, fire, stone shapes, mountain, waterfalls, bees, etc.) return
+"You don't see X here."
+
+**Suggestion:** Add a `scenery` HashMap to Room containing examinable keywords
+and their descriptions. e.g. `"troll" → "Three stone shapes, frozen forever
+mid-argument."`, `"mountain" → "The great peak of Erebor towers above you."`
+
+**Severity:** Medium — natural player behaviour that currently breaks immersion.
+
+---
+
+#### IMP-16: Non-lethal ATTACK on NPCs gives generic response
+
+Attacking an NPC who isn't a puzzle target (e.g. Gandalf, Thorin, Elrond)
+gives a bland "You wave your sword" or "no weapon" response. These should
+be NPC-specific.
+
+**Suggestion:** e.g. `attack gandalf` → "Gandalf gives you a withering look.
+'I would not advise that, my dear hobbit.'"
+
+**Severity:** Low — would add flavour.
+
+---
+
+#### IMP-17: New rooms (Beorn's Hall, Lake-town, Lonely Mountain) have no items or NPCs
+
+These rooms are atmospheric but lack interactive content. Adding Beorn as
+an NPC in his hall or scenery items would improve the second half of the game.
+
+**Severity:** Low — the rooms work and have good descriptions, this is polish.
+
+---
+
+#### IMP-18: NPC idle text fires during active troll encounter
+
+If a wandering NPC (Gandalf, Thorin) is in the Troll Clearing while the
+trolls are alive, their idle text fires normally. This feels immersion-
+breaking — Gandalf casually puffing his pipe while trolls threaten you.
+
+**Suggestion:** Suppress NPC idle/movement in rooms with active encounters,
+or have NPCs react to the trolls instead.
+
+**Severity:** Very low — unlikely to occur and somewhat amusing if it does.
+
+---
+
+### What Works Well
+
+- **Troll puzzle**: Alive description on first visit, north correctly blocked,
+  WAIT solves with dramatic narrative, key appears, revisit shows stone trolls,
+  description transitions cleanly between alive/stone states
+- **Riddle game**: All 3 riddles work with exact and partial answers ("a mountain",
+  "the teeth"), wrong answer = death with hint, QUIT during riddle works,
+  Gollum removed after win, east exit dynamically added, re-RIDDLE after
+  win handled ("nobody here to play riddles with")
+- **USE command**: All 5 items have flavour text, context-sensitive at Lonely
+  Mountain (map hints at door, key hints at needing map), items without
+  inventory correctly rejected, unknown items get generic response
+- **Win condition**: Map+key = full win sequence, key without map = hint,
+  USE MAP at mountain = hint about needing key — all paths covered
+- **Death states**: Attack trolls, attack Gollum, wrong riddle answer all
+  give themed GAME OVER with hints about correct approach
+- **New rooms**: Beorn's Hall, Lake-town, Lonely Mountain all have atmospheric
+  descriptions, correct exits, proper first-visit/revisit behaviour
+- **Command aliases**: WAIT/Z, ATTACK/FIGHT/KILL/HIT/STAB, RIDDLE, PLAY RIDDLE,
+  PLAY RIDDLES, UNLOCK all work correctly
+- **Edge cases**: Double WAIT (second gives "Time passes..."), RIDDLE with no
+  Gollum, PLAY CARDS rejected, bare ATTACK gives "Attack what?", NPC ticks
+  suppressed during riddle game
+- **Integration**: All existing features (items, NPCs, navigation, inventory,
+  examine, talk to) work correctly alongside new puzzle mechanics
+- **HELP text**: Updated with all new commands
+
+---
+
 ## Summary
 
 | Iteration | Category | Found | Fixed |
@@ -176,8 +333,12 @@ No blank line between "Exits: east" and the idle text.
 | 1 | Improvements | 9 | 9 |
 | 2 | Bugs | 3 | 0 |
 | 2 | Improvements | 5 | 0 |
+| 3 | Bugs | 3 | 0 |
+| 3 | Improvements | 4 | 0 |
 
-**Top 3 priorities for next fix pass:**
-1. BUG-6 / IMP-10 — TAKE/DROP should recognise NPCs and give flavour responses
-2. IMP-12 — NPC keyword aliases (wizard, dwarf, creature, etc.)
-3. BUG-8 / IMP-11 — EXAMINE NPC-not-here vs unknown-thing consistency
+**Top priorities for next fix pass:**
+1. BUG-9 / IMP-15 — Scenery examination (trolls, mountain, etc.)
+2. BUG-6 / IMP-10 — TAKE/DROP should recognise NPCs (from Iteration 2)
+3. BUG-10 — Fix "the" grammar in generic attack response
+4. BUG-11 — Remove "Strange eyes" from Goblin Cave post-Gollum description
+5. IMP-12 — NPC keyword aliases (from Iteration 2)
