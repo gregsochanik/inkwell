@@ -66,7 +66,12 @@ fn cmd_go(dir_str: &str, state: &mut GameState) -> String {
 
 fn cmd_look(state: &GameState) -> String {
     let room = state.current_room();
-    let mut text = format!("\n--- {} ---\n{}", room.name, room.description);
+    let desc = if room.items.is_empty() {
+        room.description_when_empty.unwrap_or(room.description)
+    } else {
+        room.description
+    };
+    let mut text = format!("\n--- {} ---\n{}", room.name, desc);
 
     // List items on the ground
     if !room.items.is_empty() {

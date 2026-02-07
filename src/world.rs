@@ -20,6 +20,7 @@ pub fn build_world() -> GameState {
                  leads outside. The walls are lined with shelves full of books, \
                  pantry jars, and maps. A warm fire crackles in the hearth. \
                  There is a strong smell of seed-cake.",
+            description_when_empty: None,
             exits: bag_end_exits,
             items: vec!["map"],
         },
@@ -39,6 +40,7 @@ pub fn build_world() -> GameState {
                  wide and blue. Bag End is behind you to the west. A winding \
                  path leads south toward a cheerful inn, and east toward dark \
                  woods.",
+            description_when_empty: None,
             exits: hill_exits,
             items: vec![],
         },
@@ -56,6 +58,7 @@ pub fn build_world() -> GameState {
                  ale and smoking pipe-weed. A stout barkeep polishes mugs \
                  behind the counter. Songs drift from a corner table. The door \
                  leads back north to the Hill.",
+            description_when_empty: None,
             exits: inn_exits,
             items: vec!["elven_bread"],
         },
@@ -74,6 +77,7 @@ pub fn build_world() -> GameState {
                  overgrown. Strange sounds echo between the trunks. You feel \
                  distinctly unwelcome here. The way continues east, or you \
                  can retreat west.",
+            description_when_empty: None,
             exits: trollshaw_exits,
             items: vec!["sword"],
         },
@@ -92,6 +96,7 @@ pub fn build_world() -> GameState {
                  Three large stone shapes loom in the centre — the remains \
                  of trolls turned to stone at dawn. A faint path leads north \
                  toward distant waterfalls.",
+            description_when_empty: None,
             exits: troll_exits,
             items: vec!["key"],
         },
@@ -110,6 +115,7 @@ pub fn build_world() -> GameState {
                  music drifts on the breeze. Waterfalls cascade into crystal \
                  pools below. You feel rested and safe — for now. A steep \
                  path climbs east into the mountains.",
+            description_when_empty: None,
             exits: rivendell_exits,
             items: vec![],
         },
@@ -128,6 +134,7 @@ pub fn build_world() -> GameState {
                  and snow stings your face. Thunder rumbles in the distance. \
                  The path is treacherous. A dark crack in the rock leads east \
                  into the mountain itself.",
+            description_when_empty: None,
             exits: misty_exits,
             items: vec![],
         },
@@ -144,6 +151,11 @@ pub fn build_world() -> GameState {
                 "A damp, dark cave deep inside the mountain. Water drips from \
                  the ceiling and the air smells foul. Strange eyes glint in \
                  the darkness. On the floor, something glimmers faintly.",
+            description_when_empty: Some(
+                "A damp, dark cave deep inside the mountain. Water drips from \
+                 the ceiling and the air smells foul. Strange eyes glint in \
+                 the darkness. The floor is bare rock, slick with moisture.",
+            ),
             exits: goblin_exits,
             items: vec!["ring"],
         },

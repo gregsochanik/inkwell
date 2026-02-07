@@ -39,6 +39,8 @@ pub struct Room {
     pub id: RoomId,
     pub name: &'static str,
     pub description: &'static str,
+    /// Alternate description shown when all original items have been taken.
+    pub description_when_empty: Option<&'static str>,
     pub exits: HashMap<Direction, RoomId>,
     pub items: Vec<ItemId>,
 }
