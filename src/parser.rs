@@ -73,7 +73,7 @@ pub fn parse(input: &str) -> Command {
         }
 
         // Drop
-        "drop" | "leave" => {
+        "drop" => {
             let target = strip_articles(&rest);
             if target.is_empty() {
                 Command::Unknown("Drop what?".to_string())
