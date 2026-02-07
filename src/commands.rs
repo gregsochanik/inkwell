@@ -58,8 +58,15 @@ fn cmd_look(state: &GameState) -> String {
         }
     }
 
-    // List exits
-    let exits: Vec<&str> = room.exits.keys().map(|d| d.name()).collect();
+    // List exits in canonical N, S, E, W order
+    let mut exit_dirs: Vec<&Direction> = room.exits.keys().collect();
+    exit_dirs.sort_by_key(|d| match d {
+        Direction::North => 0,
+        Direction::South => 1,
+        Direction::East => 2,
+        Direction::West => 3,
+    });
+    let exits: Vec<&str> = exit_dirs.iter().map(|d| d.name()).collect();
     if !exits.is_empty() {
         text.push_str(&format!("\n\nExits: {}", exits.join(", ")));
     }
