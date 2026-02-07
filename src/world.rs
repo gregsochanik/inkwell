@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::game_state::{Direction, GameState, Item, Room};
+use crate::game_state::{Direction, GameState, Item, Npc, Room};
 
 /// Build the initial game state with all rooms, items, and connections.
 pub fn build_world() -> GameState {
@@ -230,15 +230,142 @@ pub fn build_world() -> GameState {
         },
     );
 
+    // --- NPCs ---
+
+    let mut npcs = HashMap::new();
+
+    npcs.insert(
+        "gandalf",
+        Npc {
+            id: "gandalf",
+            name: "Gandalf the Grey",
+            description:
+                "A tall old man in a grey cloak and pointed hat. His eyes \
+                 twinkle with a knowing light beneath bushy eyebrows. He \
+                 leans on a gnarled wooden staff.",
+            current_room: "bag_end",
+            allowed_rooms: vec![
+                "bag_end", "the_hill", "trollshaw", "troll_clearing",
+                "rivendell", "misty_pass",
+            ],
+            dialogue: vec![
+                "\"Good morning! Or is it? What do you mean by good morning?\"",
+                "\"I am looking for someone to share in an adventure.\"",
+                "\"You'll have a tale or two to tell when you come back.\"",
+                "\"The world is not in your books and maps. It's out there.\"",
+                "\"All good stories deserve embellishment.\"",
+            ],
+            dialogue_index: 0,
+            idle_texts: vec![
+                "Gandalf puffs on his pipe, blowing a smoke ring shaped like a ship.",
+                "Gandalf peers at you over his spectacles.",
+                "Gandalf taps his staff on the ground thoughtfully.",
+                "Gandalf mutters something about being late — or perhaps early.",
+                "Gandalf gazes into the distance, as if seeing things far away.",
+            ],
+        },
+    );
+
+    npcs.insert(
+        "thorin",
+        Npc {
+            id: "thorin",
+            name: "Thorin Oakenshield",
+            description:
+                "A proud dwarf with a long beard and a fur-trimmed cloak. \
+                 He carries himself with the bearing of a king, though his \
+                 eyes hold a deep sadness.",
+            current_room: "the_hill",
+            allowed_rooms: vec![
+                "bag_end", "the_hill", "green_dragon", "trollshaw",
+                "troll_clearing", "rivendell",
+            ],
+            dialogue: vec![
+                "\"I am Thorin, son of Thrain, son of Thror, King under the Mountain.\"",
+                "\"We seek to reclaim our homeland from the dragon Smaug.\"",
+                "\"This quest is not for the faint-hearted, halfling.\"",
+                "\"The Arkenstone... I must have it.\"",
+                "\"If more of us valued food and cheer above hoarded gold, \
+                 it would be a merrier world.\"",
+            ],
+            dialogue_index: 0,
+            idle_texts: vec![
+                "Thorin sits down and starts singing about gold.",
+                "Thorin strokes his beard and stares into the fire.",
+                "Thorin polishes his sword with a distant look in his eyes.",
+                "Thorin mutters darkly about dragons.",
+                "Thorin hums a deep dwarven melody.",
+            ],
+        },
+    );
+
+    npcs.insert(
+        "elrond",
+        Npc {
+            id: "elrond",
+            name: "Elrond Half-elven",
+            description:
+                "An ageless elf-lord with dark hair and wise grey eyes. \
+                 He radiates calm authority. A circlet of silver rests \
+                 upon his brow.",
+            current_room: "rivendell",
+            allowed_rooms: vec!["rivendell"],
+            dialogue: vec![
+                "\"Welcome to Rivendell, little one.\"",
+                "\"This map has moon-letters. Hold it up to the moonlight.\"",
+                "\"The road ahead is perilous. Rest here while you can.\"",
+                "\"Your blade is of elvish make — Orcrist's kin. It will glow \
+                 blue when goblins are near.\"",
+                "\"Even the smallest person can change the course of the future.\"",
+            ],
+            dialogue_index: 0,
+            idle_texts: vec![
+                "Elrond studies an ancient tome with quiet concentration.",
+                "Elrond gazes at the waterfalls, lost in memory.",
+                "Elrond speaks softly to a passing elf in Sindarin.",
+            ],
+        },
+    );
+
+    npcs.insert(
+        "gollum",
+        Npc {
+            id: "gollum",
+            name: "Gollum",
+            description:
+                "A wretched, thin creature with large pale eyes that glow \
+                 in the dark. He crouches on a rock, muttering to himself \
+                 and wringing his bony hands.",
+            current_room: "goblin_cave",
+            allowed_rooms: vec!["goblin_cave"],
+            dialogue: vec![
+                "\"What has it got in its pocketses, precious?\"",
+                "\"We likes riddles, don't we, precious? Yes we does!\"",
+                "\"It's ours, precious. It came to us on our birthday.\"",
+                "\"Thief! Baggins! We hates it forever!\"",
+                "\"Gollum! Gollum!\"",
+            ],
+            dialogue_index: 0,
+            idle_texts: vec![
+                "Gollum splashes in the dark water, catching a blind fish.",
+                "Gollum mutters \"my precious\" over and over to himself.",
+                "Gollum watches you with huge, unblinking eyes.",
+                "Gollum hisses and retreats into the shadows.",
+            ],
+        },
+    );
+
     let mut visited_rooms = HashSet::new();
     visited_rooms.insert("bag_end");
 
     GameState {
         rooms,
         items,
+        npcs,
         current_room: "bag_end",
         inventory: Vec::new(),
         visited_rooms,
+        turn: 0,
         running: true,
     }
 }

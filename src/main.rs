@@ -1,5 +1,6 @@
 mod commands;
 mod game_state;
+mod npc;
 mod parser;
 mod world;
 
@@ -31,6 +32,15 @@ fn main() {
         let cmd = parser::parse(&input);
         let output = commands::execute(&cmd, &mut state);
         println!("{}", output);
+
+        // Run NPC tick (idle behaviour, movement) after each player action
+        if state.running {
+            state.turn += 1;
+            let npc_output = npc::tick(&mut state);
+            if !npc_output.is_empty() {
+                print!("{}", npc_output);
+            }
+        }
     }
 }
 

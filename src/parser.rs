@@ -82,6 +82,20 @@ pub fn parse(input: &str) -> Command {
             }
         }
 
+        // Talk to NPC — "talk to gandalf", "talk gandalf", "speak to thorin"
+        "talk" | "speak" | "chat" => {
+            let target = rest
+                .strip_prefix("to ")
+                .or_else(|| rest.strip_prefix("with "))
+                .unwrap_or(&rest);
+            let target = strip_articles(target);
+            if target.is_empty() || target == "to" || target == "with" {
+                Command::Unknown("Talk to whom?".to_string())
+            } else {
+                Command::TalkTo(target.to_string())
+            }
+        }
+
         // Inventory
         "inventory" | "i" => Command::Inventory,
 

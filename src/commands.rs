@@ -1,4 +1,4 @@
-use crate::game_state::{Command, Direction, GameState, ItemId};
+use crate::game_state::{Command, Direction, GameState, ItemId, RoomId};
 
 /// Maximum number of items a hobbit can carry.
 const MAX_INVENTORY: usize = 4;
@@ -31,6 +31,7 @@ pub fn execute(cmd: &Command, state: &mut GameState) -> String {
         Command::Take(target) => cmd_take(target, state),
         Command::Drop(target) => cmd_drop(target, state),
         Command::Examine(target) => cmd_examine(target, state),
+        Command::TalkTo(target) => cmd_talk_to(target, state),
         Command::Inventory => cmd_inventory(state),
         Command::Help => cmd_help(),
         Command::Quit => {
@@ -77,15 +78,19 @@ fn cmd_go(dir_str: &str, state: &mut GameState) -> String {
     }
 }
 
-/// Full room description (used by LOOK command and first visit).
-fn cmd_look(state: &GameState) -> String {
-    let room = state.current_room();
-    let desc = if room.items.is_empty() {
-        room.description_when_empty.unwrap_or(room.description)
-    } else {
-        room.description
-    };
-    let mut text = format!("\n--- {} ---\n{}", room.name, desc);
+/// Append NPC, item, and exit information to a room description.
+fn append_room_details(text: &mut String, room_id: RoomId, state: &GameState) {
+    let room = state.rooms.get(room_id).expect("room must exist");
+
+    // List NPCs present
+    let npc_ids = state.npcs_in_room(room_id);
+    if !npc_ids.is_empty() {
+        for npc_id in &npc_ids {
+            if let Some(npc) = state.npcs.get(npc_id) {
+                text.push_str(&format!("\n{} is here.", npc.name));
+            }
+        }
+    }
 
     // List items on the ground
     if !room.items.is_empty() {
@@ -109,38 +114,28 @@ fn cmd_look(state: &GameState) -> String {
     if !exits.is_empty() {
         text.push_str(&format!("\n\nExits: {}", exits.join(", ")));
     }
+}
 
+/// Full room description (used by LOOK command and first visit).
+fn cmd_look(state: &GameState) -> String {
+    let room = state.current_room();
+    let desc = if room.items.is_empty() {
+        room.description_when_empty.unwrap_or(room.description)
+    } else {
+        room.description
+    };
+    let room_id = state.current_room;
+    let mut text = format!("\n--- {} ---\n{}", room.name, desc);
+    append_room_details(&mut text, room_id, state);
     text
 }
 
 /// Short room description (used on revisit when navigating).
 fn cmd_glance(state: &GameState) -> String {
     let room = state.current_room();
+    let room_id = state.current_room;
     let mut text = format!("\n--- {} ---\n{}", room.name, room.short_description);
-
-    // Still list items on the ground
-    if !room.items.is_empty() {
-        text.push_str("\n\nYou can see:");
-        for &item_id in &room.items {
-            if let Some(item) = state.items.get(item_id) {
-                text.push_str(&format!("\n  {}", item.name));
-            }
-        }
-    }
-
-    // List exits in canonical N, S, E, W order
-    let mut exit_dirs: Vec<&Direction> = room.exits.keys().collect();
-    exit_dirs.sort_by_key(|d| match d {
-        Direction::North => 0,
-        Direction::South => 1,
-        Direction::East => 2,
-        Direction::West => 3,
-    });
-    let exits: Vec<&str> = exit_dirs.iter().map(|d| d.name()).collect();
-    if !exits.is_empty() {
-        text.push_str(&format!("\n\nExits: {}", exits.join(", ")));
-    }
-
+    append_room_details(&mut text, room_id, state);
     text
 }
 
@@ -216,6 +211,16 @@ fn cmd_examine(target: &str, state: &GameState) -> String {
         _ => {}
     }
 
+    // Check NPCs in the current room
+    let npc_ids = state.npcs_in_room(state.current_room);
+    for npc_id in &npc_ids {
+        if let Some(npc) = state.npcs.get(npc_id) {
+            if npc.id.contains(target) || npc.name.to_lowercase().contains(target) {
+                return format!("{}\n{}", npc.name, npc.description);
+            }
+        }
+    }
+
     // Check inventory first, then current room
     let item_id = state
         .inventory
@@ -241,6 +246,38 @@ fn cmd_examine(target: &str, state: &GameState) -> String {
             }
         }
         None => format!("You don't see '{}' here.", target),
+    }
+}
+
+fn cmd_talk_to(target: &str, state: &mut GameState) -> String {
+    // Find an NPC in the current room matching the target
+    let npc_ids = state.npcs_in_room(state.current_room);
+    let found_id = npc_ids.iter().find(|&&npc_id| {
+        if let Some(npc) = state.npcs.get(npc_id) {
+            npc.id.contains(target) || npc.name.to_lowercase().contains(target)
+        } else {
+            false
+        }
+    }).copied();
+
+    match found_id {
+        Some(npc_id) => {
+            let npc = state.npcs.get_mut(npc_id).expect("npc must exist");
+            let line = npc.dialogue[npc.dialogue_index];
+            npc.dialogue_index = (npc.dialogue_index + 1) % npc.dialogue.len();
+            format!("{} says: {}", npc.name, line)
+        }
+        None => {
+            // Check if the NPC exists but isn't here
+            let exists = state.npcs.values().any(|npc| {
+                npc.id.contains(target) || npc.name.to_lowercase().contains(target)
+            });
+            if exists {
+                format!("You don't see '{}' here right now.", target)
+            } else {
+                format!("There is nobody called '{}' here.", target)
+            }
+        }
     }
 }
 
@@ -270,7 +307,8 @@ Available commands:
   NORTH/SOUTH/EAST/WEST — Shortcut for GO <direction>
   TAKE <item>           — Pick up an item
   DROP <item>           — Drop an item from your inventory
-  EXAMINE <item> (X)    — Examine an item closely
+  EXAMINE <item> (X)    — Examine an item or person closely
+  TALK TO <name>        — Talk to someone nearby
   INVENTORY (I)         — List what you are carrying
   HELP (?)              — Show this help
   QUIT (Q)              — Leave the game"
