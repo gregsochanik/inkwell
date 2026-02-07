@@ -68,13 +68,20 @@ src/
 - ✅ EXAMINE works on NPCs
 - ✅ NPC arrival/departure messages when player is in the room
 
-## Iteration 3 — Puzzles & Win Condition
+## Iteration 3 — Puzzles & Win Condition ✅ DONE
 
-- Troll encounter puzzle (use items / wait for dawn)
-- Riddle game with Gollum in the Goblin Cave
-- Locked doors / key usage
-- Win condition: reach the Lonely Mountain with the right items
-- Death / game-over states
+- ✅ Troll encounter puzzle — trolls alive in clearing, block north passage.
+  WAIT triggers Gandalf's voice tricking them until dawn turns them to stone.
+  ATTACK trolls = death. Key revealed after puzzle solved.
+- ✅ Riddle game with Gollum — RIDDLE command starts 3-riddle game
+  (mountain, teeth, egg). Win = eastern passage opens. Wrong answer = death.
+- ✅ Key usage — USE KEY at the Lonely Mountain (with map) = win condition
+- ✅ Win condition — reach Lonely Mountain with map + key, USE KEY to win
+- ✅ Death / game-over states — attacking trolls, attacking Gollum,
+  wrong riddle answer all result in GAME OVER
+- ✅ 3 new rooms: Beorn's Hall, Lake-town, The Lonely Mountain
+- ✅ USE command with flavour responses for all items (ring, sword, bread, map)
+- ✅ WAIT, ATTACK, RIDDLE commands added
 
 ## Iteration 4 — Polish & Atmosphere
 

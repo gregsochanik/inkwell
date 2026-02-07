@@ -96,6 +96,29 @@ pub fn parse(input: &str) -> Command {
             }
         }
 
+        // Attack / fight
+        "attack" | "fight" | "kill" | "hit" | "stab" => {
+            let target = strip_articles(&rest);
+            if target.is_empty() {
+                Command::Unknown("Attack what?".to_string())
+            } else {
+                Command::Attack(target.to_string())
+            }
+        }
+
+        // Play riddles
+        "riddle" | "riddles" => Command::Riddle,
+        "play" => {
+            if rest.is_empty() || rest.starts_with("riddle") {
+                Command::Riddle
+            } else {
+                Command::Unknown(format!("I don't understand 'play {}'.", rest))
+            }
+        }
+
+        // Wait
+        "wait" | "z" => Command::Wait,
+
         // Inventory
         "inventory" | "i" => Command::Inventory,
 
@@ -105,12 +128,14 @@ pub fn parse(input: &str) -> Command {
         // Recognised but not-yet-implemented verbs — give flavour responses
         "open" => Command::Unknown("You can't open that.".to_string()),
         "use" => {
-            if rest.is_empty() {
+            let target = strip_articles(&rest);
+            if target.is_empty() {
                 Command::Unknown("Use what?".to_string())
             } else {
-                Command::Unknown(format!("You're not sure how to use the {}.", strip_articles(&rest)))
+                Command::Use(target.to_string())
             }
         }
+        "unlock" => Command::Use("key".to_string()),
         "eat" | "drink" => {
             if rest.is_empty() {
                 Command::Unknown("Eat what?".to_string())

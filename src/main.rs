@@ -29,12 +29,17 @@ fn main() {
             }
         }
 
-        let cmd = parser::parse(&input);
-        let output = commands::execute(&cmd, &mut state);
+        // If a riddle is pending, handle input as an answer
+        let output = if state.pending_riddle.is_some() {
+            commands::handle_riddle_answer(&input, &mut state)
+        } else {
+            let cmd = parser::parse(&input);
+            commands::execute(&cmd, &mut state)
+        };
         println!("{}", output);
 
-        // Run NPC tick (idle behaviour, movement) after each player action
-        if state.running {
+        // Run NPC tick (idle behaviour, movement) — skip during riddle game
+        if state.running && state.pending_riddle.is_none() {
             state.turn += 1;
             let npc_output = npc::tick(&mut state);
             if !npc_output.is_empty() {

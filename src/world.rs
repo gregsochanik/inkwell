@@ -103,7 +103,7 @@ pub fn build_world() -> GameState {
             short_description: "You are in the Troll Clearing. Stone trolls loom nearby.",
             description_when_empty: None,
             exits: troll_exits,
-            items: vec!["key"],
+            items: vec![],
         },
     );
 
@@ -166,6 +166,73 @@ pub fn build_world() -> GameState {
             ),
             exits: goblin_exits,
             items: vec!["ring"],
+        },
+    );
+
+    // --- New rooms (east of mountains, unlocked by puzzles) ---
+
+    let mut beorn_exits = HashMap::new();
+    beorn_exits.insert(Direction::West, "goblin_cave");
+    beorn_exits.insert(Direction::East, "lake_town");
+    rooms.insert(
+        "beorns_hall",
+        Room {
+            id: "beorns_hall",
+            name: "Beorn's Hall",
+            description:
+                "You emerge from the eastern side of the Misty Mountains into \
+                 a wide valley. A great wooden hall stands amid fields of \
+                 clover, where enormous bees buzz lazily. The hall belongs to \
+                 Beorn, a skin-changer — half man, half bear. The air smells \
+                 of honey and fresh hay. The mountains rise behind you to \
+                 the west, and open lands stretch east.",
+            short_description: "You are in Beorn's wide valley. His great hall stands nearby.",
+            description_when_empty: None,
+            exits: beorn_exits,
+            items: vec![],
+        },
+    );
+
+    let mut lake_exits = HashMap::new();
+    lake_exits.insert(Direction::West, "beorns_hall");
+    lake_exits.insert(Direction::East, "lonely_mountain");
+    rooms.insert(
+        "lake_town",
+        Room {
+            id: "lake_town",
+            name: "Lake-town",
+            description:
+                "A bustling town built on wooden stilts over the Long Lake. \
+                 Fishermen mend their nets on the docks and children peer \
+                 at you from doorways. Smoke rises from chimneys and the \
+                 smell of fish stew fills the air. To the east, the Lonely \
+                 Mountain rises like a dark tower against the sky, a thin \
+                 wisp of smoke curling from its peak.",
+            short_description: "You are in Lake-town. The Lonely Mountain looms to the east.",
+            description_when_empty: None,
+            exits: lake_exits,
+            items: vec![],
+        },
+    );
+
+    let mut mountain_exits = HashMap::new();
+    mountain_exits.insert(Direction::West, "lake_town");
+    rooms.insert(
+        "lonely_mountain",
+        Room {
+            id: "lonely_mountain",
+            name: "The Lonely Mountain",
+            description:
+                "You stand at the foot of Erebor — the Lonely Mountain. \
+                 The great peak towers above you, its slopes bare and grey. \
+                 Somewhere on the western face, hidden from prying eyes, \
+                 lies a secret door. Dragon-smoke drifts from a vent high \
+                 above. The air is hot and smells of sulphur.",
+            short_description:
+                "You stand before the Lonely Mountain. Dragon-smoke drifts above.",
+            description_when_empty: None,
+            exits: mountain_exits,
+            items: vec![],
         },
     );
 
@@ -365,6 +432,8 @@ pub fn build_world() -> GameState {
         current_room: "bag_end",
         inventory: Vec::new(),
         visited_rooms,
+        flags: HashSet::new(),
+        pending_riddle: None,
         turn: 0,
         running: true,
     }
