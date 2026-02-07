@@ -12,6 +12,7 @@ fn main() {
 
     // Show the starting room
     println!("{}", commands::execute(&game_state::Command::Look, &mut state));
+    println!("\nWhat will you do?");
 
     while state.running {
         print!("\n> ");
