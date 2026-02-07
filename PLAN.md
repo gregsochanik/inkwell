@@ -59,12 +59,14 @@ src/
 
 ---
 
-## Iteration 2 — NPCs & Dialogue
+## Iteration 2 — NPCs & Dialogue ✅ DONE
 
-- Gandalf, Thorin, and other dwarves as NPCs present in rooms
-- NPCs have idle behaviour text (e.g. "Thorin sits down and starts singing about gold.")
-- `TALK TO <npc>` command
-- NPCs can move between rooms on their own each turn (simple AI)
+- ✅ Gandalf, Thorin, Elrond, and Gollum as NPCs present in rooms
+- ✅ NPCs have idle behaviour text (e.g. "Thorin sits down and starts singing about gold.")
+- ✅ `TALK TO <npc>` command with cycling dialogue lines
+- ✅ NPCs can move between adjacent allowed rooms on their own each turn (simple AI)
+- ✅ EXAMINE works on NPCs
+- ✅ NPC arrival/departure messages when player is in the room
 
 ## Iteration 3 — Puzzles & Win Condition
 
@@ -76,7 +78,7 @@ src/
 
 ## Iteration 4 — Polish & Atmosphere
 
-- Randomised NPC flavour text
+- ~~Randomised NPC flavour text~~ (done in iteration 2)
 - ASCII art title screen and room illustrations
 - Save / load game state
 - Colour output (ANSI codes)
