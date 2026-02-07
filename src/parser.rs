@@ -1,5 +1,16 @@
 use crate::game_state::Command;
 
+/// Strip leading articles ("a", "an", "the") from a noun phrase.
+fn strip_articles(s: &str) -> &str {
+    let s = s.trim();
+    for article in &["a ", "an ", "the "] {
+        if let Some(rest) = s.strip_prefix(article) {
+            return rest.trim();
+        }
+    }
+    s
+}
+
 /// Parse a line of player input into a Command.
 pub fn parse(input: &str) -> Command {
     let input = input.trim().to_lowercase();
@@ -30,17 +41,19 @@ pub fn parse(input: &str) -> Command {
 
         // Examine
         "examine" | "x" | "inspect" => {
-            if rest.is_empty() {
+            let target = strip_articles(&rest);
+            if target.is_empty() {
                 Command::Unknown("Examine what?".to_string())
             } else {
-                Command::Examine(rest)
+                Command::Examine(target.to_string())
             }
         }
 
         // Take / pick up
         "take" | "get" | "grab" | "pick" => {
             // handle "pick up X"
-            let target = rest.strip_prefix("up ").unwrap_or(&rest);
+            let without_up = rest.strip_prefix("up ").unwrap_or(&rest);
+            let target = strip_articles(without_up);
             if target.is_empty() {
                 Command::Unknown("Take what?".to_string())
             } else {
@@ -50,10 +63,11 @@ pub fn parse(input: &str) -> Command {
 
         // Drop
         "drop" | "leave" => {
-            if rest.is_empty() {
+            let target = strip_articles(&rest);
+            if target.is_empty() {
                 Command::Unknown("Drop what?".to_string())
             } else {
-                Command::Drop(rest)
+                Command::Drop(target.to_string())
             }
         }
 
