@@ -50,8 +50,8 @@ pub fn parse(input: &str) -> Command {
             }
         }
 
-        // Examine
-        "examine" | "x" | "inspect" => {
+        // Examine / read
+        "examine" | "x" | "inspect" | "read" => {
             let target = strip_articles(&rest);
             if target.is_empty() {
                 Command::Unknown("Examine what?".to_string())
@@ -87,6 +87,33 @@ pub fn parse(input: &str) -> Command {
 
         // Help
         "help" | "?" => Command::Help,
+
+        // Recognised but not-yet-implemented verbs — give flavour responses
+        "open" => Command::Unknown("You can't open that.".to_string()),
+        "use" => {
+            if rest.is_empty() {
+                Command::Unknown("Use what?".to_string())
+            } else {
+                Command::Unknown(format!("You're not sure how to use the {}.", strip_articles(&rest)))
+            }
+        }
+        "eat" | "drink" => {
+            if rest.is_empty() {
+                Command::Unknown("Eat what?".to_string())
+            } else {
+                Command::Unknown(format!("You can't eat the {} right now.", strip_articles(&rest)))
+            }
+        }
+        "wear" | "equip" => {
+            if rest.is_empty() {
+                Command::Unknown("Wear what?".to_string())
+            } else {
+                Command::Unknown(format!("You can't wear the {}.", strip_articles(&rest)))
+            }
+        }
+        "put" => {
+            Command::Unknown("You can't put that there.".to_string())
+        }
 
         // Quit
         "quit" | "q" | "exit" => Command::Quit,
