@@ -1,3 +1,4 @@
+use crate::color;
 use crate::game_state::{GameState, NpcId, RoomId};
 
 /// Simple pseudo-random number based on turn and a seed value.
@@ -66,10 +67,10 @@ pub fn tick(state: &mut GameState) -> String {
                             .unwrap_or("somewhere");
                         output.push_str(&format!(
                             "\n{} wanders off toward {}.",
-                            npc_name, dest_name
+                            color::npc(npc_name), dest_name
                         ));
                     } else if destination == player_room {
-                        output.push_str(&format!("\n{} arrives.", npc_name));
+                        output.push_str(&format!("\n{} arrives.", color::npc(npc_name)));
                     }
 
                     continue; // Skip idle text if we moved

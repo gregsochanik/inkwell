@@ -1,3 +1,4 @@
+use crate::color;
 use crate::game_state::{Command, Direction, GameState, ItemId, RoomId};
 
 /// Maximum number of items a hobbit can carry.
@@ -23,33 +24,6 @@ const RIDDLE_QUESTIONS: [&str; 3] = [
 ];
 
 const RIDDLE_ANSWERS: [&str; 3] = ["mountain", "teeth", "egg"];
-
-// --- Win text ---
-
-const WIN_TEXT: &str = "\
-You consult the weathered map and find the hidden mark on the western \
-face of the mountain. Moon-letters shimmer in the fading light, \
-revealing a keyhole cunningly disguised in the rock.
-
-You insert the ornate key and turn it. With a grinding of ancient \
-stone, a door swings open where there was only bare rock before.
-
-A passage leads deep into the heart of the mountain. After what \
-feels like hours of walking, you emerge into an enormous hall \
-filled with gold, jewels, and treasure beyond imagining.
-
-You have found the dragon's hoard of Erebor!
-
-================================================================
-                    CONGRATULATIONS!
-
-    You have completed HOBITTY: An 80s Text Adventure!
-
-    Dobo Daggins, burglar extraordinaire, has reclaimed
-    the treasure of the Lonely Mountain.
-
-    Thank you for playing!
-================================================================";
 
 /// Check if any item in a list matches the target string by id or name.
 fn item_matches_any(items: &[ItemId], target: &str, state: &GameState) -> bool {
@@ -93,6 +67,54 @@ fn get_room_short_desc(state: &GameState) -> &'static str {
         "troll_clearing" if !state.flags.contains("trolls_defeated") => TROLL_ALIVE_SHORT,
         _ => room.short_description,
     }
+}
+
+/// Build the win text with colours.
+fn win_text() -> String {
+    format!(
+        "\
+You consult the weathered map and find the hidden mark on the western \
+face of the mountain. Moon-letters shimmer in the fading light, \
+revealing a keyhole cunningly disguised in the rock.
+
+You insert the ornate key and turn it. With a grinding of ancient \
+stone, a door swings open where there was only bare rock before.
+
+A passage leads deep into the heart of the mountain. After what \
+feels like hours of walking, you emerge into an enormous hall \
+filled with gold, jewels, and treasure beyond imagining.
+
+You have found the dragon's hoard of Erebor!
+
+{bell}{success}
+================================================================
+                    CONGRATULATIONS!
+
+    You have completed HOBITTY: An 80s Text Adventure!
+
+    Dobo Daggins, burglar extraordinaire, has reclaimed
+    the treasure of the Lonely Mountain.
+
+    Thank you for playing!
+================================================================
+{reset}",
+        bell = color::BELL,
+        success = color::BRIGHT_YELLOW,
+        reset = color::RESET,
+    )
+}
+
+/// Build a game-over message with colours and bell.
+fn game_over(message: &str, hint: &str) -> String {
+    format!(
+        "{message}\n\n\
+         {bell}{danger}\n\n\
+         {hint}",
+        message = message,
+        bell = color::BELL,
+        danger = color::danger("=== GAME OVER ==="),
+        hint = hint,
+    )
 }
 
 /// Execute a parsed command against the game state, returning the text to display.
@@ -187,7 +209,7 @@ fn append_room_details(text: &mut String, room_id: RoomId, state: &GameState) {
     if !npc_ids.is_empty() {
         for npc_id in &npc_ids {
             if let Some(npc) = state.npcs.get(npc_id) {
-                text.push_str(&format!("\n{} is here.", npc.name));
+                text.push_str(&format!("\n{} is here.", color::npc(npc.name)));
             }
         }
     }
@@ -197,7 +219,7 @@ fn append_room_details(text: &mut String, room_id: RoomId, state: &GameState) {
         text.push_str("\n\nYou can see:");
         for &item_id in &room.items {
             if let Some(item) = state.items.get(item_id) {
-                text.push_str(&format!("\n  {}", item.name));
+                text.push_str(&format!("\n  {}", color::item(item.name)));
             }
         }
     }
@@ -212,7 +234,10 @@ fn append_room_details(text: &mut String, room_id: RoomId, state: &GameState) {
     });
     let exits: Vec<&str> = exit_dirs.iter().map(|d| d.name()).collect();
     if !exits.is_empty() {
-        text.push_str(&format!("\n\nExits: {}", exits.join(", ")));
+        text.push_str(&format!(
+            "\n\n{}",
+            color::exits(&format!("Exits: {}", exits.join(", ")))
+        ));
     }
 }
 
@@ -221,7 +246,11 @@ fn cmd_look(state: &GameState) -> String {
     let room = state.current_room();
     let desc = get_room_desc(state);
     let room_id = state.current_room;
-    let mut text = format!("\n--- {} ---\n{}", room.name, desc);
+    let mut text = format!(
+        "\n{}\n{}",
+        color::room_title(&format!("--- {} ---", room.name)),
+        desc
+    );
     append_room_details(&mut text, room_id, state);
     text
 }
@@ -231,7 +260,11 @@ fn cmd_glance(state: &GameState) -> String {
     let room = state.current_room();
     let short = get_room_short_desc(state);
     let room_id = state.current_room;
-    let mut text = format!("\n--- {} ---\n{}", room.name, short);
+    let mut text = format!(
+        "\n{}\n{}",
+        color::room_title(&format!("--- {} ---", room.name)),
+        short
+    );
     append_room_details(&mut text, room_id, state);
     text
 }
@@ -266,7 +299,9 @@ fn cmd_take(target: &str, state: &mut GameState) -> String {
             // Add to inventory
             state.inventory.push(item_id);
             let name = state.items.get(item_id).map(|i| i.name).unwrap_or(item_id);
-            format!("You pick up {}.", name)
+            // Bell when picking up the ring
+            let bell = if item_id == "ring" { color::BELL } else { "" };
+            format!("{}You pick up {}.", bell, color::item(name))
         }
         None => {
             // Check if already carrying it
@@ -298,7 +333,7 @@ fn cmd_drop(target: &str, state: &mut GameState) -> String {
             let item_id = state.inventory.remove(idx);
             state.current_room_mut().items.push(item_id);
             let name = state.items.get(item_id).map(|i| i.name).unwrap_or(item_id);
-            format!("You drop {}.", name)
+            format!("You drop {}.", color::item(name))
         }
         None => format!("You don't have '{}'.", target),
     }
@@ -316,7 +351,7 @@ fn cmd_examine(target: &str, state: &GameState) -> String {
     for npc_id in &npc_ids {
         if let Some(npc) = state.npcs.get(npc_id) {
             if npc.id.contains(target) || npc.name.to_lowercase().contains(target) {
-                return format!("{}\n{}", npc.name, npc.description);
+                return format!("{}\n{}", color::npc(npc.name), npc.description);
             }
         }
     }
@@ -340,7 +375,7 @@ fn cmd_examine(target: &str, state: &GameState) -> String {
     match item_id {
         Some(id) => {
             if let Some(item) = state.items.get(id) {
-                format!("{}\n{}", item.name, item.description)
+                format!("{}\n{}", color::item(item.name), item.description)
             } else {
                 "You see nothing special.".to_string()
             }
@@ -368,7 +403,11 @@ fn cmd_talk_to(target: &str, state: &mut GameState) -> String {
             let npc = state.npcs.get_mut(npc_id).expect("npc must exist");
             let line = npc.dialogue[npc.dialogue_index];
             npc.dialogue_index = (npc.dialogue_index + 1) % npc.dialogue.len();
-            format!("{} says: {}", npc.name, line)
+            format!(
+                "{} says: {}",
+                color::npc(npc.name),
+                color::dialogue(line)
+            )
         }
         None => {
             // Check if the NPC exists but isn't here
@@ -398,20 +437,23 @@ fn cmd_wait(state: &mut GameState) -> String {
             room.items.push("key");
         }
 
-        return "You hold very still and wait...\n\n\
-                The trolls continue arguing:\n\
-                \"Let's roast 'em slowly!\" says Tom.\n\
-                \"No, sit on 'em and squash 'em into jelly!\" says Bert.\n\
-                \"You're both ninnies!\" says William.\n\n\
-                From somewhere in the trees, a voice remarkably like \
-                William's calls out — \"Dawn take you all, and be stone \
-                to you!\"\n\n\
-                The trolls look up just as the first rays of sunlight \
-                break over the tree-tops. One by one, they stiffen, \
-                their skin turns grey, and they become... stone.\n\n\
-                Silence fills the clearing. Among the trolls' belongings, \
-                you notice an ornate key glinting in the morning light."
-            .to_string();
+        return format!(
+            "You hold very still and wait...\n\n\
+             The trolls continue arguing:\n\
+             \"Let's roast 'em slowly!\" says Tom.\n\
+             \"No, sit on 'em and squash 'em into jelly!\" says Bert.\n\
+             \"You're both ninnies!\" says William.\n\n\
+             From somewhere in the trees, a voice remarkably like \
+             William's calls out — \"Dawn take you all, and be stone \
+             to you!\"\n\n\
+             The trolls look up just as the first rays of sunlight \
+             break over the tree-tops. One by one, they stiffen, \
+             their skin turns grey, and they become... stone.\n\n\
+             {}Silence fills the clearing. Among the trolls' belongings, \
+             you notice {} glinting in the morning light.",
+            color::BELL,
+            color::item("an ornate key"),
+        );
     }
 
     "Time passes...".to_string()
@@ -427,7 +469,7 @@ fn cmd_use(target: &str, state: &mut GameState) -> String {
             if state.inventory.iter().any(|&id| id == "map") {
                 // WIN!
                 state.running = false;
-                return WIN_TEXT.to_string();
+                return win_text();
             } else {
                 return "You try the key on the mountainside, but without \
                         a map you have no idea where the secret door is."
@@ -492,14 +534,14 @@ fn cmd_attack(target: &str, state: &mut GameState) -> String {
     if state.current_room == "troll_clearing" && !state.flags.contains("trolls_defeated") {
         if target.contains("troll") {
             state.running = false;
-            return "You charge at the trolls, but they are enormous — \
-                    each one three times your size. Tom grabs you before \
-                    you can even swing and stuffs you into a sack.\n\n\
-                    \"We'll have this one for supper!\" says Bert.\n\n\
-                    === GAME OVER ===\n\n\
-                    You have been caught by trolls. Perhaps patience \
-                    would have served you better than bravery."
-                .to_string();
+            return game_over(
+                "You charge at the trolls, but they are enormous — \
+                 each one three times your size. Tom grabs you before \
+                 you can even swing and stuffs you into a sack.\n\n\
+                 \"We'll have this one for supper!\" says Bert.",
+                "You have been caught by trolls. Perhaps patience \
+                 would have served you better than bravery.",
+            );
         }
     }
 
@@ -507,23 +549,20 @@ fn cmd_attack(target: &str, state: &mut GameState) -> String {
     if state.current_room == "goblin_cave" {
         if target.contains("gollum") || target.contains("creature") {
             state.running = false;
-            return "You lunge at Gollum, but he is far quicker than \
-                    he looks. He vanishes into the shadows and you hear \
-                    a terrible hiss behind you. In the pitch darkness \
-                    of the cave, you never see what hits you.\n\n\
-                    === GAME OVER ===\n\n\
-                    Violence was not the answer here. Perhaps riddles \
-                    would have been wiser."
-                .to_string();
+            return game_over(
+                "You lunge at Gollum, but he is far quicker than \
+                 he looks. He vanishes into the shadows and you hear \
+                 a terrible hiss behind you. In the pitch darkness \
+                 of the cave, you never see what hits you.",
+                "Violence was not the answer here. Perhaps riddles \
+                 would have been wiser.",
+            );
         }
     }
 
     // Generic responses
     if state.inventory.iter().any(|&id| id == "sword") {
-        format!(
-            "You wave your sword at the {}. Nothing much happens.",
-            target
-        )
+        format!("You wave your sword at {}. Nothing much happens.", target)
     } else {
         "You have nothing to fight with! And really, is violence \
          the hobbit way?"
@@ -551,10 +590,15 @@ fn cmd_riddle(state: &mut GameState) -> String {
     // Start the riddle game
     state.pending_riddle = Some(0);
     format!(
-        "Gollum's eyes light up. \"Riddles! We plays a game of riddles, \
-         precious! If it wins, we shows it the way out. If it loses... \
-         we eats it whole!\"\n\nGollum asks:\n{}",
-        RIDDLE_QUESTIONS[0]
+        "{} eyes light up. {}\n\n{} asks:\n{}",
+        color::npc("Gollum's"),
+        color::dialogue(
+            "\"Riddles! We plays a game of riddles, \
+             precious! If it wins, we shows it the way out. If it loses... \
+             we eats it whole!\""
+        ),
+        color::npc("Gollum"),
+        color::riddle(RIDDLE_QUESTIONS[0]),
     )
 }
 
@@ -581,10 +625,13 @@ pub fn handle_riddle_answer(input: &str, state: &mut GameState) -> String {
             // Next riddle
             state.pending_riddle = Some(riddle_idx + 1);
             format!(
-                "\"Yess, yess...\" Gollum hisses grudgingly. \"It knows \
-                 this one, precious. But can it answer THIS?\"\n\n\
-                 Gollum asks:\n{}",
-                RIDDLE_QUESTIONS[riddle_idx + 1]
+                "{}\n\n{} asks:\n{}",
+                color::dialogue(
+                    "\"Yess, yess...\" Gollum hisses grudgingly. \"It knows \
+                     this one, precious. But can it answer THIS?\""
+                ),
+                color::npc("Gollum"),
+                color::riddle(RIDDLE_QUESTIONS[riddle_idx + 1]),
             )
         } else {
             // Won all riddles!
@@ -601,25 +648,35 @@ pub fn handle_riddle_answer(input: &str, state: &mut GameState) -> String {
                 room.exits.insert(Direction::East, "beorns_hall");
             }
 
-            "\"Curse it! CURSE IT!\" Gollum shrieks, tearing at his \
-             thin hair. \"It wins, precious. Tricky, nasty hobbitses!\"\n\n\
-             Gollum, bound by his wretched promise, slinks away into \
-             the darkness. As he goes, you notice a faint draught of \
-             fresh air from the east — a hidden passage!\n\n\
-             A new exit has opened to the east."
-                .to_string()
+            format!(
+                "{}\n\n\
+                 Gollum, bound by his wretched promise, slinks away into \
+                 the darkness. As he goes, you notice a faint draught of \
+                 fresh air from the east — a hidden passage!\n\n\
+                 {}",
+                color::dialogue(
+                    "\"Curse it! CURSE IT!\" Gollum shrieks, tearing at his \
+                     thin hair. \"It wins, precious. Tricky, nasty hobbitses!\""
+                ),
+                color::exits("A new exit has opened to the east."),
+            )
         }
     } else {
         // Wrong answer — death
         state.running = false;
         state.pending_riddle = None;
-        "\"WRONG!\" Gollum shrieks with glee. \"Wrong, wrong, WRONG!\"\n\n\
-         Gollum lunges from the shadows with terrible speed. In the \
-         pitch darkness of the cave, you never stood a chance.\n\n\
-         === GAME OVER ===\n\n\
-         You have been eaten by Gollum. Perhaps next time, brush up \
-         on your riddles."
-            .to_string()
+        game_over(
+            &format!(
+                "{}\n\n\
+                 Gollum lunges from the shadows with terrible speed. In the \
+                 pitch darkness of the cave, you never stood a chance.",
+                color::dialogue(
+                    "\"WRONG!\" Gollum shrieks with glee. \"Wrong, wrong, WRONG!\""
+                ),
+            ),
+            "You have been eaten by Gollum. Perhaps next time, brush up \
+             on your riddles.",
+        )
     }
 }
 
@@ -634,7 +691,7 @@ fn cmd_inventory(state: &GameState) -> String {
         );
         for &item_id in &state.inventory {
             if let Some(item) = state.items.get(item_id) {
-                text.push_str(&format!("\n  {}", item.name));
+                text.push_str(&format!("\n  {}", color::item(item.name)));
             }
         }
         text
@@ -642,21 +699,40 @@ fn cmd_inventory(state: &GameState) -> String {
 }
 
 fn cmd_help() -> String {
-    "\
+    format!(
+        "\
 Available commands:
-  LOOK (L)              — Look around the current room
-  GO <direction>        — Move in a direction (NORTH/N, SOUTH/S, EAST/E, WEST/W)
-  NORTH/SOUTH/EAST/WEST — Shortcut for GO <direction>
-  TAKE <item>           — Pick up an item
-  DROP <item>           — Drop an item from your inventory
-  EXAMINE <item> (X)    — Examine an item or person closely
-  TALK TO <name>        — Talk to someone nearby
-  USE <item>            — Use an item you are carrying
-  WAIT (Z)              — Wait and let time pass
-  RIDDLE                — Challenge someone to a game of riddles
-  ATTACK <target>       — Attack something (not very hobbit-like)
-  INVENTORY (I)         — List what you are carrying
-  HELP (?)              — Show this help
-  QUIT (Q)              — Leave the game"
-        .to_string()
+  {look:<22} — Look around the current room
+  {go:<22} — Move in a direction (NORTH/N, SOUTH/S, EAST/E, WEST/W)
+  {dirs:<22} — Shortcut for GO <direction>
+  {take:<22} — Pick up an item
+  {drop:<22} — Drop an item from your inventory
+  {examine:<22} — Examine an item or person closely
+  {talk:<22} — Talk to someone nearby
+  {use_cmd:<22} — Use an item you are carrying
+  {wait:<22} — Wait and let time pass
+  {riddle:<22} — Challenge someone to a game of riddles
+  {attack:<22} — Attack something (not very hobbit-like)
+  {save:<22} — Save your game to a file
+  {load:<22} — Load a previously saved game
+  {inv:<22} — List what you are carrying
+  {help:<22} — Show this help
+  {quit:<22} — Leave the game",
+        look = "LOOK (L)",
+        go = "GO <direction>",
+        dirs = "NORTH/SOUTH/EAST/WEST",
+        take = "TAKE <item>",
+        drop = "DROP <item>",
+        examine = "EXAMINE <item> (X)",
+        talk = "TALK TO <name>",
+        use_cmd = "USE <item>",
+        wait = "WAIT (Z)",
+        riddle = "RIDDLE",
+        attack = "ATTACK <target>",
+        save = "SAVE",
+        load = "LOAD",
+        inv = "INVENTORY (I)",
+        help = "HELP (?)",
+        quit = "QUIT (Q)",
+    )
 }

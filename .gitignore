@@ -12,6 +12,9 @@
 *.swo
 *~
 
+# Save files
+*.sav
+
 # OS
 .DS_Store
 Thumbs.db

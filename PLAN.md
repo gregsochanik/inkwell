@@ -83,14 +83,24 @@ src/
 - ✅ USE command with flavour responses for all items (ring, sword, bread, map)
 - ✅ WAIT, ATTACK, RIDDLE commands added
 
-## Iteration 4 — Polish & Atmosphere
+## Iteration 4 — Polish & Atmosphere ✅ DONE
 
 - ~~Randomised NPC flavour text~~ (done in iteration 2)
-- ASCII art title screen and room illustrations
-- Save / load game state
-- Colour output (ANSI codes)
-- More rooms extending the map toward the Lonely Mountain
-- Sound effects via terminal bell (just for fun)
+- ✅ Colour output (ANSI codes) — room titles (bold cyan), NPC names (bold green),
+  item names (yellow), exits (bold), death text (bright red), win text (bright yellow),
+  riddle text (italic magenta), NPC dialogue (green), coloured title banner
+- ✅ Save / load game state — SAVE and LOAD commands, custom line-based format
+  (`hobitty.sav`), handles full state reconstruction including room items, NPC
+  positions, puzzle flags, inventory, and visited rooms
+- ✅ Sound effects via terminal bell — bell on game over, win, troll puzzle solved,
+  and picking up the ring
+- ✅ New room: Mirkwood (between Beorn's Hall and Lake-town) with atmospheric
+  cobweb/spider description
+- ✅ New NPC: Beorn in Beorn's Hall with dialogue and idle behaviour
+- ✅ New module: `src/color.rs` for ANSI colour constants and helper functions
+- ✅ New module: `src/save.rs` for save/load logic
+- ✅ Coloured title screen with bold ASCII art banner
+- ✅ Updated HELP to include SAVE/LOAD commands
 
 ---
 

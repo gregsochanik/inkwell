@@ -173,7 +173,7 @@ pub fn build_world() -> GameState {
 
     let mut beorn_exits = HashMap::new();
     beorn_exits.insert(Direction::West, "goblin_cave");
-    beorn_exits.insert(Direction::East, "lake_town");
+    beorn_exits.insert(Direction::East, "mirkwood");
     rooms.insert(
         "beorns_hall",
         Room {
@@ -193,8 +193,31 @@ pub fn build_world() -> GameState {
         },
     );
 
+    let mut mirkwood_exits = HashMap::new();
+    mirkwood_exits.insert(Direction::West, "beorns_hall");
+    mirkwood_exits.insert(Direction::East, "lake_town");
+    rooms.insert(
+        "mirkwood",
+        Room {
+            id: "mirkwood",
+            name: "Mirkwood",
+            description:
+                "You enter the dark eaves of Mirkwood. The trees grow so thick \
+                 that barely any light reaches the forest floor. Strange sounds \
+                 echo in the gloom — the scuttle of many legs, the snap of twigs. \
+                 Thick cobwebs hang between the branches above. A thin path \
+                 weaves east through the trees. Every instinct tells you not to \
+                 leave it.",
+            short_description:
+                "You are in the dark depths of Mirkwood. Cobwebs hang overhead.",
+            description_when_empty: None,
+            exits: mirkwood_exits,
+            items: vec![],
+        },
+    );
+
     let mut lake_exits = HashMap::new();
-    lake_exits.insert(Direction::West, "beorns_hall");
+    lake_exits.insert(Direction::West, "mirkwood");
     lake_exits.insert(Direction::East, "lonely_mountain");
     rooms.insert(
         "lake_town",
@@ -418,6 +441,34 @@ pub fn build_world() -> GameState {
                 "Gollum mutters \"my precious\" over and over to himself.",
                 "Gollum watches you with huge, unblinking eyes.",
                 "Gollum hisses and retreats into the shadows.",
+            ],
+        },
+    );
+
+    npcs.insert(
+        "beorn",
+        Npc {
+            id: "beorn",
+            name: "Beorn",
+            description:
+                "A massive man with wild, dark hair and a thick beard. He \
+                 moves with the heavy grace of a bear. His eyes are sharp \
+                 and watchful, but not unkind.",
+            current_room: "beorns_hall",
+            allowed_rooms: vec!["beorns_hall"],
+            dialogue: vec![
+                "\"I don't much like dwarves. But I like goblins even less.\"",
+                "\"You may stay the night. My animals will see to your needs.\"",
+                "\"The forest of Mirkwood lies to the east. Do not leave the path!\"",
+                "\"I am Beorn. Some call me a skin-changer. It is not polite to ask why.\"",
+                "\"Take some honey-cakes for the road. You will need your strength.\"",
+            ],
+            dialogue_index: 0,
+            idle_texts: vec![
+                "Beorn pours a great bowl of cream for a cat the size of a dog.",
+                "Beorn sharpens a massive axe, humming a deep tune.",
+                "Beorn gazes out at the mountains with a faraway look.",
+                "A huge black dog trots up to Beorn and rests its head on his knee.",
             ],
         },
     );

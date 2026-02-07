@@ -325,6 +325,95 @@ or have NPCs react to the trolls instead.
 
 ---
 
+## Iteration 4 — Polish & Atmosphere
+
+Tested: Coloured output (banner, room titles, NPC names, item names, exits,
+death text, win text, riddle text, dialogue, prompt), save/load (save, load,
+restore alias, no-save-file error, mid-riddle save, mid-riddle load, flags
+reconstruction, NPC position restoration, room items restoration, visited rooms),
+Mirkwood room (navigation, description, exits), Beorn NPC (dialogue, examine,
+idle text), terminal bell, HELP updated with SAVE/LOAD, .gitignore for save files.
+
+### Bugs
+
+#### BUG-12: GAME OVER text displayed twice — once coloured, once plain — **FIXED**
+
+**Cause:** The `game_over` helper function had `{danger}=== GAME OVER ==={reset}`
+in the format string, but `{danger}` was `color::danger("=== GAME OVER ===")`,
+which already includes the text. Result: the text appeared twice.
+
+**Fix:** Removed the duplicate literal `=== GAME OVER ===` from the format string.
+
+---
+
+### Feature Improvements
+
+#### IMP-19: `hobitty.sav` not in `.gitignore` — **FIXED**
+
+Save files should not be committed to the repository. Added `*.sav` to `.gitignore`.
+
+---
+
+#### IMP-20: Loading a mid-riddle save doesn't re-display the current riddle question
+
+**Steps to reproduce:**
+1. Start a riddle game, save during it
+2. Quit and restart
+3. Load the save
+4. The room description is shown but not the riddle question — the player
+   must answer blind
+
+**Expected:** After loading a save with `pending_riddle` set, re-display
+the current riddle question so the player knows what to answer.
+
+**Severity:** Medium — players who save during a riddle and reload later
+will be confused.
+
+---
+
+#### IMP-21: Win text congratulations banner is not bold
+
+The `win_text()` function uses `color::BRIGHT_YELLOW` directly instead of
+`color::success()` which adds bold. The congratulations banner appears in
+yellow but not bold, unlike the game-over text which is bright red.
+
+**Severity:** Very low — cosmetic only.
+
+---
+
+### What Works Well
+
+- **Colour output**: All targeted elements are coloured consistently:
+  - Room titles: bold cyan
+  - NPC names: bold green (in room display, dialogue, examine, arrival/departure)
+  - Item names: yellow (in room display, pickup, drop, inventory, examine, troll key)
+  - Exits: bold
+  - GAME OVER: bright red
+  - Win text: bright yellow
+  - Riddle questions: italic magenta
+  - NPC dialogue: green
+  - Banner: coloured ASCII art with bold/cyan/yellow/dim
+  - Prompt: bold
+- **Save/Load**: Fully functional — saves and restores all mutable state including
+  room, inventory, NPC positions/dialogue indexes, puzzle flags, visited rooms,
+  room items, and pending riddle state. Dynamic exits (goblin cave east) correctly
+  reconstructed from flags on load. Clear error for missing save file.
+- **Mid-riddle save/load**: SAVE intercepted before riddle answer handler, saves
+  `pending_riddle` state. LOAD during riddle works. Loading a mid-riddle save
+  continues the riddle correctly (though without re-displaying the question).
+- **Mirkwood room**: Atmospheric cobweb/spider description, correct exits
+  (west→Beorn's Hall, east→Lake-town), integrates into the full path.
+- **Beorn NPC**: 5 dialogue lines cycling correctly, examine description, 4 idle
+  texts, stays in Beorn's Hall (static NPC), adds life to previously empty room.
+- **Terminal bell**: Present in output at game over, win, troll puzzle solved,
+  and ring pickup (verified in raw output — \x07 characters present).
+- **HELP**: Updated with SAVE and LOAD commands, well-formatted table.
+- **Full playthrough**: Complete path Bag End→...→Lonely Mountain with both
+  puzzles solved, all items collected, USE KEY at mountain with map = win.
+  Tested from scratch and via save/load.
+
+---
+
 ## Summary
 
 | Iteration | Category | Found | Fixed |
@@ -335,10 +424,13 @@ or have NPCs react to the trolls instead.
 | 2 | Improvements | 5 | 0 |
 | 3 | Bugs | 3 | 0 |
 | 3 | Improvements | 4 | 0 |
+| 4 | Bugs | 1 | 1 |
+| 4 | Improvements | 3 | 1 |
 
 **Top priorities for next fix pass:**
 1. BUG-9 / IMP-15 — Scenery examination (trolls, mountain, etc.)
 2. BUG-6 / IMP-10 — TAKE/DROP should recognise NPCs (from Iteration 2)
-3. BUG-10 — Fix "the" grammar in generic attack response
-4. BUG-11 — Remove "Strange eyes" from Goblin Cave post-Gollum description
-5. IMP-12 — NPC keyword aliases (from Iteration 2)
+3. IMP-20 — Re-display riddle question after loading mid-riddle save
+4. BUG-10 — Fix "the" grammar in generic attack response
+5. BUG-11 — Remove "Strange eyes" from Goblin Cave post-Gollum description
+6. IMP-12 — NPC keyword aliases (from Iteration 2)
