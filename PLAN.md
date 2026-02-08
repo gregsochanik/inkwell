@@ -104,8 +104,58 @@ src/
 
 ---
 
+## Iteration 5 — Data-Driven Engine (YAML)
+
+**Goal:** Separate the game engine from the game content. All game content
+(rooms, items, NPCs, puzzles, dialogue, win/death conditions) moves into a
+YAML file. The Rust engine becomes a generic text adventure runtime that can
+play any game defined in this format.
+
+### 5a — YAML Schema & Loader (foundation) ✅ DONE
+
+- ✅ Added `serde` + `serde_yaml` crates
+- ✅ Designed YAML schema: game metadata, rooms, items, NPCs
+- ✅ Created `game.yaml` with all existing Hobitty content
+- ✅ New `src/loader.rs` module: parse YAML → `GameState` (uses `Box::leak`
+  to convert `String` → `&'static str`, keeping all engine code unchanged)
+- ✅ Replaced `world::build_world()` with YAML loader in `main.rs` and `save.rs`
+- ✅ Game compiles, runs, and plays identically from YAML
+
+### 5b — Puzzles & Triggers in YAML
+
+- [ ] Design a trigger/event system in the schema:
+  - Triggers: conditions (player in room, has item, flag set/unset) → effects
+  - Effects: set flag, add/remove item in room, open/close exit, print text,
+    start riddle sequence, game over, win
+- [ ] Move troll puzzle to YAML triggers
+- [ ] Move Gollum riddle game to YAML triggers
+- [ ] Move win condition (USE KEY at Lonely Mountain with map) to YAML
+- [ ] Move death conditions to YAML
+- [ ] Move special USE/WAIT/ATTACK responses to YAML
+- [ ] Remove all hardcoded puzzle logic from `commands.rs`
+
+### 5c — Dialogue & Flavour in YAML
+
+- [ ] Move all NPC dialogue lines to YAML (already in 5a for basic dialogue)
+- [ ] Move room description variants (e.g. troll clearing before/after puzzle)
+  into YAML with conditional descriptions
+- [ ] Move banner / intro text to YAML game metadata
+- [ ] Move item use flavour text to YAML
+
+### 5d — Validation & Documentation
+
+- [ ] YAML schema validation on load (missing rooms, broken exit references,
+  missing items, etc.) with clear error messages
+- [ ] Write a short `AUTHORING.md` guide: how to create a new game using
+  the YAML format
+- [ ] Create a minimal example game YAML (not Hobitty) to prove the engine
+  is truly generic
+
+---
+
 ## Tech Notes
 
 - Pure Rust, no external crates for iteration 1 (just `std`)
-- `cargo run` to play
-- Designed for easy extension — rooms and items defined as data, not code
+- `serde` + `serde_yaml` added in iteration 5
+- `cargo run` to play (loads `game.yaml` from working directory)
+- Designed for easy extension — games defined as YAML data, not code

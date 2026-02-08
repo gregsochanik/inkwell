@@ -3,7 +3,7 @@
 use std::fs;
 
 use crate::game_state::{Direction, GameState};
-use crate::world;
+use crate::loader;
 
 const SAVE_FILE: &str = "hobitty.sav";
 const SAVE_VERSION: &str = "HOBITTY_SAVE_V1";
@@ -66,7 +66,8 @@ pub fn load_game() -> Result<GameState, String> {
         return Err("Save file is corrupted or from a different version.".to_string());
     }
 
-    let mut state = world::build_world();
+    let mut state = loader::load_game_yaml("game.yaml")
+        .map_err(|e| format!("Cannot load game definition: {}", e))?;
 
     for line in &lines[1..] {
         if let Some((key, value)) = line.split_once('=') {

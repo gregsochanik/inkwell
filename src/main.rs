@@ -2,6 +2,7 @@ mod art;
 mod color;
 mod commands;
 mod game_state;
+mod loader;
 mod npc;
 mod parser;
 mod save;
@@ -12,7 +13,11 @@ use std::io::{self, Write};
 fn main() {
     print_banner();
 
-    let mut state = world::build_world();
+    let mut state = loader::load_game_yaml("game.yaml")
+        .unwrap_or_else(|e| {
+            eprintln!("Failed to load game: {}", e);
+            std::process::exit(1);
+        });
 
     // Show the starting room
     println!("{}", commands::execute(&game_state::Command::Look, &mut state));
