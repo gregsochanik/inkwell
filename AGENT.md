@@ -1,9 +1,11 @@
-# Agent Guide — Hobitty
+# Agent Guide
 
 ## What this is
 
-A data-driven text adventure engine in Rust. Games are defined in YAML; the
-engine handles parsing, state, triggers, NPCs, riddles, save/load, and ANSI art.
+A generic data-driven text adventure engine in Rust. Games are defined in
+YAML; the engine handles parsing, state, triggers, NPCs, riddles, save/load,
+and ANSI art. The engine contains no game-specific logic — all content lives
+in YAML files.
 
 ## Project layout
 
@@ -16,12 +18,12 @@ src/
   commands.rs      Command dispatch (delegates puzzle logic to triggers)
   parser.rs        Text input → Command enum
   npc.rs           NPC idle behaviour and movement AI
-  save.rs          Save/load game state to file
+  save.rs          Save/load game state to file (stored in game directory)
   art.rs           Built-in ANSI half-block room art (fallback)
   color.rs         ANSI escape code constants
   world.rs         Legacy hardcoded world builder (dead code, kept for reference)
 examples/
-  hobitty/         Main game — Hobbit-inspired adventure
+  hobitty/         Hobbit-inspired adventure (the original game)
   locked_tower/    Minimal 3-room demo game
 PLAN.md            Roadmap and iteration history
 AUTHORING.md       Guide for creating games in YAML
@@ -37,6 +39,7 @@ AUTHORING.md       Guide for creating games in YAML
 - Trigger system: `event` + `target` + `direction` + `conditions` → `effects`.
 - Text templates: `{bold:text}`, `{npc:text}`, `{item:text}`, `{dialogue:text}`,
   `{exits:text}`, `{bell}`.
+- **No game-specific logic in Rust.** All content and puzzles are in YAML.
 
 ## Build & run
 

@@ -7,7 +7,7 @@ use crate::loader;
 use crate::triggers;
 
 const SAVE_FILENAME: &str = "save.dat";
-const SAVE_VERSION: &str = "HOBITTY_SAVE_V1";
+const SAVE_VERSION: &str = "ADVENTURE_SAVE_V1";
 
 /// Build the full save file path inside the game directory.
 fn save_path(game_dir: &str) -> String {

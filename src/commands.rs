@@ -3,7 +3,7 @@ use crate::color;
 use crate::game_state::{Command, Direction, GameState, ItemId, RoomId};
 use crate::triggers;
 
-/// Maximum number of items a hobbit can carry.
+/// Maximum number of items the player can carry.
 const MAX_INVENTORY: usize = 4;
 
 /// Check if any item in a list matches the target string by id or name.
@@ -378,9 +378,7 @@ fn cmd_attack(target: &str, state: &mut GameState) -> String {
     if state.inventory.iter().any(|&id| id == "sword") {
         format!("You wave your sword at {}. Nothing much happens.", target)
     } else {
-        "You have nothing to fight with! And really, is violence \
-         the hobbit way?"
-            .to_string()
+        "You have nothing to fight with!".to_string()
     }
 }
 
@@ -431,7 +429,7 @@ Available commands:
   {use_cmd:<22} — Use an item you are carrying
   {wait:<22} — Wait and let time pass
   {riddle:<22} — Challenge someone to a game of riddles
-  {attack:<22} — Attack something (not very hobbit-like)
+  {attack:<22} — Attack something
   {save:<22} — Save your game to a file
   {load:<22} — Load a previously saved game
   {inv:<22} — List what you are carrying

@@ -1,26 +1,26 @@
-# Hobitty
+# Hobitty — A Text Adventure Engine in Rust
 
-An 80s-style text adventure engine in Rust, loosely inspired by the classic
-1982 Melbourne House *The Hobbit*.
+A data-driven text adventure engine where games are defined entirely in YAML.
+The Rust engine handles text parsing, room navigation, inventory, NPCs,
+puzzles, riddles, save/load, and ANSI terminal art.
 
-Games are defined entirely in YAML — the Rust engine handles parsing, room
-navigation, inventory, NPCs, puzzles, riddles, save/load, and ANSI art.
+Originally inspired by the classic 1982 Melbourne House *The Hobbit*, the
+project has evolved into a generic engine that can run any text adventure
+game described in a YAML file.
 
 ## Requirements
 
 - **Rust** (edition 2024) — install via [rustup](https://rustup.rs/)
 
-No other dependencies required. Everything is pure Rust + `serde`/`serde_yaml`.
+No other external dependencies. Uses `serde` and `serde_yaml` for YAML parsing.
 
 ## Quick start
 
 ```bash
-# Clone and build
-git clone <repo-url>
-cd hobitty
+# Build
 cargo build
 
-# Play the main adventure
+# Play the included Hobbit-inspired adventure
 cargo run -- examples/hobitty
 
 # Play the demo escape game
@@ -29,7 +29,7 @@ cargo run -- examples/locked_tower
 
 ## How to play
 
-Type commands at the `>` prompt. The parser understands simple verb-noun input:
+Type commands at the `>` prompt:
 
 | Command | Examples |
 |---------|----------|
@@ -48,8 +48,8 @@ Type commands at the `>` prompt. The parser understands simple verb-noun input:
 
 ### Hobitty (`examples/hobitty/`)
 
-A ~10 room adventure where you play as Dobo Daggins. Collect items, outwit
-trolls, solve Gollum's riddles, and find the treasure of the Lonely Mountain.
+A ~10 room adventure loosely based on The Hobbit. Collect items, outwit
+trolls, solve riddles, and find the treasure of the Lonely Mountain.
 
 ### The Locked Tower (`examples/locked_tower/`)
 
@@ -58,7 +58,7 @@ Pick a lock, answer a ghost's riddle, and climb to freedom.
 
 ## Creating your own game
 
-Games are self-contained directories with a `game.yaml` file:
+Each game is a directory containing a `game.yaml` file:
 
 ```
 examples/my_game/
@@ -66,8 +66,8 @@ examples/my_game/
   art/            # room art .ans files (optional)
 ```
 
-See [AUTHORING.md](AUTHORING.md) for the full YAML schema reference, including
-rooms, items, NPCs, triggers, riddles, and text templates.
+See [AUTHORING.md](AUTHORING.md) for the full YAML schema reference covering
+rooms, items, NPCs, triggers, conditions, effects, riddles, and text templates.
 
 Run your game with:
 
@@ -81,27 +81,28 @@ The engine validates your YAML on load and reports errors and warnings.
 
 ```
 src/
-  main.rs          Game loop and CLI
-  game_state.rs    Core data types
-  loader.rs        YAML loader and validator
-  triggers.rs      Event/condition/effect engine
+  main.rs          Entry point, CLI, game loop
+  game_state.rs    Core data types (Room, Item, Npc, Trigger, etc.)
+  loader.rs        YAML parsing, state building, validation
+  triggers.rs      Condition/effect engine, riddle system, text templates
   commands.rs      Command dispatch
-  parser.rs        Text parser
-  npc.rs           NPC behaviour
-  save.rs          Save/load
-  art.rs           Built-in ANSI room art
-  color.rs         Terminal colour helpers
+  parser.rs        Text input parser
+  npc.rs           NPC idle behaviour and movement
+  save.rs          Save/load game state
+  art.rs           Built-in ANSI room art (fallback if no .ans file)
+  color.rs         Terminal colour constants
+  world.rs         Legacy hardcoded world (dead code, kept for reference)
 examples/          Game directories
 PLAN.md            Development roadmap
 AUTHORING.md       Game authoring guide
+AGENT.md           Quick reference for AI agents working on this project
 ```
 
 ## Contributing
 
 1. Check [PLAN.md](PLAN.md) for the roadmap and open iterations.
-2. Game content changes go in YAML, not Rust code.
-3. Engine changes should remain generic — no game-specific logic in Rust.
-4. After changes, verify both example games still play through to completion.
+2. Game content goes in YAML — engine code should stay generic.
+3. After changes, verify both example games play through to completion.
 
 ## Licence
 

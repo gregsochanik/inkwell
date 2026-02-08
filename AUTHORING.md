@@ -1,6 +1,6 @@
-# Authoring a Game for Hobitty Engine
+# Authoring a Game
 
-This guide explains how to create a text adventure game using the Hobitty
+This guide explains how to create a text adventure game using the engine's
 YAML format. The Rust engine is generic — it reads a `game.yaml` file and
 plays whatever game is defined there.
 
