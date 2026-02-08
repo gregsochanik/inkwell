@@ -1,3 +1,4 @@
+mod art;
 mod color;
 mod commands;
 mod game_state;

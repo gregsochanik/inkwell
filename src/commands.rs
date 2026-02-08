@@ -1,3 +1,4 @@
+use crate::art;
 use crate::color;
 use crate::game_state::{Command, Direction, GameState, ItemId, RoomId};
 
@@ -246,11 +247,17 @@ fn cmd_look(state: &GameState) -> String {
     let room = state.current_room();
     let desc = get_room_desc(state);
     let room_id = state.current_room;
-    let mut text = format!(
-        "\n{}\n{}",
-        color::room_title(&format!("--- {} ---", room.name)),
-        desc
-    );
+    let mut text = String::from("\n");
+
+    // Show room art if available
+    if let Some(room_art) = art::get_room_art(room_id) {
+        text.push_str(&room_art);
+        text.push('\n');
+    }
+
+    text.push_str(&color::room_title(&format!("--- {} ---", room.name)));
+    text.push('\n');
+    text.push_str(desc);
     append_room_details(&mut text, room_id, state);
     text
 }
