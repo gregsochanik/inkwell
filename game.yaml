@@ -75,6 +75,17 @@ rooms:
       of trolls turned to stone at dawn. A faint path leads north
       toward distant waterfalls.
     short_description: "You are in the Troll Clearing. Stone trolls loom nearby."
+    conditional_descriptions:
+      - conditions:
+          - !flag_unset trolls_defeated
+        description: >-
+          A trampled clearing littered with bones and broken carts.
+          Three enormous trolls sit around a sputtering fire, arguing
+          about how to cook their latest catch. They turn their ugly
+          heads toward you and snarl. The path north toward the
+          waterfalls is blocked by their bulk.
+        short_description: >-
+          You are in the Troll Clearing. Three enormous trolls block the path.
     exits:
       west: trollshaw
       north: rivendell
@@ -328,3 +339,279 @@ npcs:
       - "Beorn sharpens a massive axe, humming a deep tune."
       - "Beorn gazes out at the mountains with a faraway look."
       - "A huge black dog trots up to Beorn and rests its head on his knee."
+
+# -------------------------------------------------------------------
+# Triggers
+# -------------------------------------------------------------------
+# Triggers are checked in order; first match wins.
+# Template syntax: {npc:text} {item:text} {dialogue:text} {riddle:text}
+#                  {exits:text} {danger:text} {bell}
+
+triggers:
+  # -- Movement blocks --
+
+  - id: troll_block_north
+    event: go
+    direction: north
+    conditions:
+      - !in_room troll_clearing
+      - !flag_unset trolls_defeated
+    effects:
+      - !print >-
+          The trolls snarl and block your path north! They're
+          enormous and very angry. You'll need to find another
+          way past them.
+
+  - id: goblin_cave_east_hint
+    event: go
+    direction: east
+    conditions:
+      - !in_room goblin_cave
+      - !flag_unset riddle_won
+    effects:
+      - !print >-
+          The cave seems to continue east, but the passages
+          twist and double back on themselves. You can't find
+          a way through. Gollum watches you from the shadows,
+          muttering about games and riddles...
+
+  # -- Wait events --
+
+  - id: troll_wait
+    event: wait
+    conditions:
+      - !in_room troll_clearing
+      - !flag_unset trolls_defeated
+    effects:
+      - !set_flag trolls_defeated
+      - !add_item
+        room: troll_clearing
+        item: key
+      - !bell ~
+      - !print |
+          You hold very still and wait...
+
+          The trolls continue arguing:
+          "Let's roast 'em slowly!" says Tom.
+          "No, sit on 'em and squash 'em into jelly!" says Bert.
+          "You're both ninnies!" says William.
+
+          From somewhere in the trees, a voice remarkably like William's calls out — "Dawn take you all, and be stone to you!"
+
+          The trolls look up just as the first rays of sunlight break over the tree-tops. One by one, they stiffen, their skin turns grey, and they become... stone.
+
+          {bell}Silence fills the clearing. Among the trolls' belongings, you notice {item:an ornate key} glinting in the morning light.
+
+  # -- Attack events --
+
+  - id: troll_attack
+    event: attack
+    target: troll
+    conditions:
+      - !in_room troll_clearing
+      - !flag_unset trolls_defeated
+    effects:
+      - !game_over
+        message: >-
+          You charge at the trolls, but they are enormous —
+          each one three times your size. Tom grabs you before
+          you can even swing and stuffs you into a sack.
+          "We'll have this one for supper!" says Bert.
+        hint: >-
+          You have been caught by trolls. Perhaps patience
+          would have served you better than bravery.
+
+  - id: gollum_attack
+    event: attack
+    target: gollum
+    conditions:
+      - !in_room goblin_cave
+    effects:
+      - !game_over
+        message: >-
+          You lunge at Gollum, but he is far quicker than
+          he looks. He vanishes into the shadows and you hear
+          a terrible hiss behind you. In the pitch darkness
+          of the cave, you never see what hits you.
+        hint: >-
+          Violence was not the answer here. Perhaps riddles
+          would have been wiser.
+
+  - id: creature_attack
+    event: attack
+    target: creature
+    conditions:
+      - !in_room goblin_cave
+    effects:
+      - !game_over
+        message: >-
+          You lunge at the creature, but it is far quicker than
+          it looks. It vanishes into the shadows and you hear
+          a terrible hiss behind you. In the pitch darkness
+          of the cave, you never see what hits you.
+        hint: >-
+          Violence was not the answer here. Perhaps riddles
+          would have been wiser.
+
+  # -- Talk events --
+
+  - id: talk_gollum_riddle
+    event: talk_to
+    target: gollum
+    conditions:
+      - !flag_unset riddle_won
+    effects:
+      - !start_riddle gollum_riddles
+
+  # -- Use item events (most specific first) --
+
+  - id: use_key_win
+    event: use
+    target: key
+    conditions:
+      - !in_room lonely_mountain
+      - !has_item map
+    effects:
+      - !win |
+          You consult the weathered map and find the hidden mark on the western face of the mountain. Moon-letters shimmer in the fading light, revealing a keyhole cunningly disguised in the rock.
+
+          You insert the ornate key and turn it. With a grinding of ancient stone, a door swings open where there was only bare rock before.
+
+          A passage leads deep into the heart of the mountain. After what feels like hours of walking, you emerge into an enormous hall filled with gold, jewels, and treasure beyond imagining.
+
+          You have found the dragon's hoard of Erebor!
+
+  - id: use_key_no_map
+    event: use
+    target: key
+    conditions:
+      - !in_room lonely_mountain
+    effects:
+      - !print >-
+          You try the key on the mountainside, but without
+          a map you have no idea where the secret door is.
+
+  - id: use_key_generic
+    event: use
+    target: key
+    effects:
+      - !print "There is nothing to use the key on here."
+
+  - id: use_ring
+    event: use
+    target: ring
+    effects:
+      - !print >-
+          You slip the ring onto your finger. The world dims
+          and fades to shadow. Strange shapes swirl at the edges
+          of your vision. You quickly take it off again, heart
+          pounding.
+
+  - id: use_sword
+    event: use
+    target: sword
+    effects:
+      - !print "You draw the elvish blade. It hums faintly."
+
+  - id: use_sting
+    event: use
+    target: sting
+    effects:
+      - !print "You draw the elvish blade. It hums faintly."
+
+  - id: use_bread
+    event: use
+    target: bread
+    effects:
+      - !print >-
+          You take a bite of the elven bread. It fills you
+          with warmth and renewed energy. Delicious!
+
+  - id: use_map_mountain
+    event: use
+    target: map
+    conditions:
+      - !in_room lonely_mountain
+    effects:
+      - !print >-
+          You study the map carefully. Moon-letters shimmer
+          along the border, pointing to a spot on the western
+          face of the mountain. If only you had a key to open
+          the secret door...
+
+  - id: use_map_generic
+    event: use
+    target: map
+    effects:
+      - !print >-
+          You study the weathered map. It shows the Lonely
+          Mountain and a secret door marked in red ink.
+
+  # -- Pickup events --
+
+  - id: ring_pickup_bell
+    event: pickup
+    target: ring
+    effects:
+      - !bell ~
+
+# -------------------------------------------------------------------
+# Riddle games
+# -------------------------------------------------------------------
+
+riddles:
+  gollum_riddles:
+    npc: gollum
+    intro: >-
+      {npc:Gollum's} eyes light up.
+      {dialogue:"Riddles! We plays a game of riddles, precious!
+      If it wins, we shows it the way out. If it loses...
+      we eats it whole!"}
+    questions:
+      - question: |
+          "What has roots as nobody sees,
+            Is taller than trees,
+            Up, up, up it goes,
+            And yet never grows?"
+        answer: mountain
+      - question: |
+          "Thirty white horses on a red hill,
+            First they champ,
+            Then they stamp,
+            Then they stand still."
+        answer: teeth
+      - question: |
+          "A box without hinges, key, or lid,
+            Yet golden treasure inside is hid."
+        answer: egg
+    correct_response: >-
+      {dialogue:"Yess, yess..." Gollum hisses grudgingly.
+      "It knows this one, precious. But can it answer THIS?"}
+    win_text: >-
+      {dialogue:"Curse it! CURSE IT!" Gollum shrieks, tearing at
+      his thin hair. "It wins, precious. Tricky, nasty hobbitses!"}
+
+
+      Gollum, bound by his wretched promise, slinks away into
+      the darkness. As he goes, you notice a faint draught of
+      fresh air from the east — a hidden passage!
+
+
+      {exits:A new exit has opened to the east.}
+    win_effects:
+      - !set_flag riddle_won
+      - !open_exit
+        room: goblin_cave
+        direction: east
+        destination: beorns_hall
+      - !remove_npc gollum
+    lose_text: >-
+      {dialogue:"WRONG!" Gollum shrieks with glee.
+      "Wrong, wrong, WRONG!"}
+
+
+      Gollum lunges from the shadows with terrible speed. In the
+      pitch darkness of the cave, you never stood a chance.
+    lose_hint: >-
+      You have been eaten by Gollum. Perhaps next time, brush up
+      on your riddles.

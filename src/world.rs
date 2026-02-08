@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use crate::game_state::{Direction, GameState, Item, Npc, Room};
 
 /// Build the initial game state with all rooms, items, and connections.
+#[allow(dead_code)] // retained as fallback; YAML loader is used at runtime
 pub fn build_world() -> GameState {
     let mut rooms = HashMap::new();
 
@@ -24,6 +25,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: bag_end_exits,
             items: vec!["map"],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -45,6 +47,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: hill_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -64,6 +67,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: inn_exits,
             items: vec!["elven_bread"],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -84,6 +88,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: trollshaw_exits,
             items: vec!["sword"],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -104,6 +109,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: troll_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -124,6 +130,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: rivendell_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -144,6 +151,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: misty_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -166,6 +174,7 @@ pub fn build_world() -> GameState {
             ),
             exits: goblin_exits,
             items: vec!["ring"],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -190,6 +199,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: beorn_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -213,6 +223,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: mirkwood_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -235,6 +246,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: lake_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -256,6 +268,7 @@ pub fn build_world() -> GameState {
             description_when_empty: None,
             exits: mountain_exits,
             items: vec![],
+            conditional_descriptions: vec![],
         },
     );
 
@@ -487,5 +500,7 @@ pub fn build_world() -> GameState {
         pending_riddle: None,
         turn: 0,
         running: true,
+        triggers: vec![],
+        riddles: HashMap::new(),
     }
 }

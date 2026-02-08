@@ -6,6 +6,7 @@ mod loader;
 mod npc;
 mod parser;
 mod save;
+mod triggers;
 mod world;
 
 use std::io::{self, Write};
@@ -64,7 +65,7 @@ fn main() {
 
         // If a riddle is pending, handle input as an answer
         let output = if state.pending_riddle.is_some() {
-            commands::handle_riddle_answer(&input, &mut state)
+            triggers::handle_riddle_answer(&input, &mut state)
         } else {
             let cmd = parser::parse(&input);
             commands::execute(&cmd, &mut state)

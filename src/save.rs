@@ -2,8 +2,9 @@
 
 use std::fs;
 
-use crate::game_state::{Direction, GameState};
+use crate::game_state::GameState;
 use crate::loader;
+use crate::triggers;
 
 const SAVE_FILE: &str = "hobitty.sav";
 const SAVE_VERSION: &str = "HOBITTY_SAVE_V1";
@@ -24,8 +25,8 @@ pub fn save_game(state: &GameState) -> Result<String, String> {
     flags.sort();
     lines.push(format!("flags={}", flags.join(",")));
 
-    match state.pending_riddle {
-        Some(idx) => lines.push(format!("pending_riddle={}", idx)),
+    match &state.pending_riddle {
+        Some(pr) => lines.push(format!("pending_riddle={},{}", pr.riddle_id, pr.question_index)),
         None => lines.push("pending_riddle=none".to_string()),
     }
 
@@ -108,24 +109,26 @@ pub fn load_game() -> Result<GameState, String> {
                     state.flags.clear();
                     if !value.is_empty() {
                         for flag in value.split(',') {
-                            match flag {
-                                "trolls_defeated" => {
-                                    state.flags.insert("trolls_defeated");
-                                }
-                                "riddle_won" => {
-                                    state.flags.insert("riddle_won");
-                                }
-                                _ => {}
+                            if !flag.is_empty() {
+                                // Leak the flag string so it lives as &'static str
+                                let leaked: &'static str = Box::leak(flag.to_string().into_boxed_str());
+                                state.flags.insert(leaked);
                             }
                         }
                     }
                 }
                 "pending_riddle" => {
-                    state.pending_riddle = if value == "none" {
-                        None
-                    } else {
-                        value.parse().ok()
-                    };
+                    if value == "none" {
+                        state.pending_riddle = None;
+                    } else if let Some((rid, idx_str)) = value.split_once(',') {
+                        if let Ok(idx) = idx_str.parse::<usize>() {
+                            let riddle_id: &'static str = Box::leak(rid.to_string().into_boxed_str());
+                            state.pending_riddle = Some(crate::game_state::PendingRiddle {
+                                riddle_id,
+                                question_index: idx,
+                            });
+                        }
+                    }
                 }
                 _ if key.starts_with("room_items:") => {
                     let room_id_str = &key["room_items:".len()..];
@@ -168,12 +171,8 @@ pub fn load_game() -> Result<GameState, String> {
         }
     }
 
-    // Reconstruct dynamic exits based on flags
-    if state.flags.contains("riddle_won") {
-        if let Some(room) = state.rooms.get_mut("goblin_cave") {
-            room.exits.insert(Direction::East, "beorns_hall");
-        }
-    }
+    // Replay structural trigger effects (e.g. open exits) based on current flags
+    triggers::replay_structural_effects(&mut state);
 
     Ok(state)
 }

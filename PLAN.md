@@ -121,26 +121,36 @@ play any game defined in this format.
 - ✅ Replaced `world::build_world()` with YAML loader in `main.rs` and `save.rs`
 - ✅ Game compiles, runs, and plays identically from YAML
 
-### 5b — Puzzles & Triggers in YAML
+### 5b — Puzzles & Triggers in YAML ✅ DONE
 
-- [ ] Design a trigger/event system in the schema:
-  - Triggers: conditions (player in room, has item, flag set/unset) → effects
-  - Effects: set flag, add/remove item in room, open/close exit, print text,
-    start riddle sequence, game over, win
-- [ ] Move troll puzzle to YAML triggers
-- [ ] Move Gollum riddle game to YAML triggers
-- [ ] Move win condition (USE KEY at Lonely Mountain with map) to YAML
-- [ ] Move death conditions to YAML
-- [ ] Move special USE/WAIT/ATTACK responses to YAML
-- [ ] Remove all hardcoded puzzle logic from `commands.rs`
+- ✅ Designed trigger/event system: triggers have event type, optional target/
+  direction, conditions (in_room, has_item, flag_set, flag_unset), and effects
+  (print, set_flag, bell, add_item, open_exit, remove_npc, game_over, win,
+  start_riddle). Uses YAML `!tag` syntax for enum variants.
+- ✅ New `src/triggers.rs` module: condition evaluation, effect execution,
+  text template processing (`{npc:text}`, `{item:text}`, `{dialogue:text}`,
+  `{exits:text}`, `{bell}`), riddle game engine, room description overrides
+- ✅ Added trigger types to `game_state.rs`: Condition, Effect, Trigger,
+  ConditionalDesc, RiddleDef, RiddleQuestion, PendingRiddle
+- ✅ All YAML deserialization types in `loader.rs` with conversion to runtime types
+- ✅ Moved troll puzzle (wait → trolls turn to stone) to YAML trigger
+- ✅ Moved troll/Gollum death conditions to YAML attack triggers
+- ✅ Moved Gollum riddle game to YAML riddles section
+- ✅ Moved win condition (USE KEY + map at Lonely Mountain) to YAML trigger
+- ✅ Moved all USE item responses to YAML triggers
+- ✅ Moved blocked exits (trolls block north, riddle blocks east) to YAML
+- ✅ Moved conditional room descriptions (troll clearing) to YAML
+- ✅ Moved ring pickup bell to YAML pickup trigger
+- ✅ Removed all hardcoded puzzle logic from `commands.rs`
+- ✅ Updated `save.rs`: generic flag loading, trigger-based exit replay
+- ✅ Full playthrough verified: all puzzles, deaths, and win condition work
 
 ### 5c — Dialogue & Flavour in YAML
 
-- [ ] Move all NPC dialogue lines to YAML (already in 5a for basic dialogue)
-- [ ] Move room description variants (e.g. troll clearing before/after puzzle)
-  into YAML with conditional descriptions
+- ✅ NPC dialogue lines already in YAML (done in 5a)
+- ✅ Room description variants (troll clearing) in YAML (done in 5b)
+- ✅ Item use flavour text in YAML (done in 5b)
 - [ ] Move banner / intro text to YAML game metadata
-- [ ] Move item use flavour text to YAML
 
 ### 5d — Validation & Documentation
 
