@@ -407,6 +407,11 @@ fn cmd_talk_to(target: &str, state: &mut GameState) -> String {
 
     match found_id {
         Some(npc_id) => {
+            // Talking to Gollum triggers the riddle game automatically
+            if npc_id == "gollum" && !state.flags.contains("riddle_won") {
+                return cmd_riddle(state);
+            }
+
             let npc = state.npcs.get_mut(npc_id).expect("npc must exist");
             let line = npc.dialogue[npc.dialogue_index];
             npc.dialogue_index = (npc.dialogue_index + 1) % npc.dialogue.len();
