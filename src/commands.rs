@@ -379,18 +379,19 @@ fn cmd_attack(target: &str, state: &mut GameState) -> String {
 }
 
 fn cmd_riddle(state: &mut GameState) -> String {
-    // The RIDDLE command also triggers via talk_to logic
-    if let Some(msg) = triggers::check_talk("gollum", state) {
-        return msg;
+    // Check if any NPC in the room has a riddle trigger
+    let npcs_here = state.npcs_in_room(state.current_room);
+    if npcs_here.is_empty() {
+        return "There is nobody here to play riddles with.".to_string();
     }
 
-    // Check if any NPC that could play riddles is here
-    let any_npc_here = !state.npcs_in_room(state.current_room).is_empty();
-    if any_npc_here {
-        "Nobody here seems interested in riddles.".to_string()
-    } else {
-        "There is nobody here to play riddles with.".to_string()
+    for npc_id in &npcs_here {
+        if let Some(msg) = triggers::check_talk(npc_id, state) {
+            return msg;
+        }
     }
+
+    "Nobody here seems interested in riddles.".to_string()
 }
 
 fn cmd_inventory(state: &GameState) -> String {

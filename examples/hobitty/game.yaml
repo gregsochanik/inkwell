@@ -476,6 +476,7 @@ triggers:
     event: talk_to
     target: gollum
     conditions:
+      - !in_room goblin_cave
       - !flag_unset riddle_won
     effects:
       - !start_riddle gollum_riddles
