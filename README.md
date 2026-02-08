@@ -8,23 +8,27 @@ Originally inspired by the classic 1982 Melbourne House *The Hobbit*, the
 project has evolved into a generic engine that can run any text adventure
 game described in a YAML file.
 
-## Requirements
+## Install
 
-- **Rust** (edition 2024) — install via [rustup](https://rustup.rs/)
+### Pre-built binaries
 
-No other external dependencies. Uses `serde` and `serde_yaml` for YAML parsing.
-
-## Quick start
+Download the latest release from the
+[Releases page](https://github.com/gregsochanik/inkwell/releases).
+Extract the binary and run it:
 
 ```bash
-# Build
-cargo build
+./inkwell examples/hobitty
+```
 
-# Play the included Hobbit-inspired adventure
-cargo run -- examples/hobitty
+### Build from source
 
-# Play the demo escape game
-cargo run -- examples/locked_tower
+Requires **Rust** (edition 2024) — install via [rustup](https://rustup.rs/).
+
+```bash
+git clone https://github.com/gregsochanik/inkwell.git
+cd inkwell
+cargo build --release
+./target/release/inkwell examples/hobitty
 ```
 
 ## How to play
