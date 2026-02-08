@@ -145,12 +145,19 @@ play any game defined in this format.
 - ✅ Updated `save.rs`: generic flag loading, trigger-based exit replay
 - ✅ Full playthrough verified: all puzzles, deaths, and win condition work
 
-### 5c — Dialogue & Flavour in YAML
+### 5c — Dialogue & Flavour in YAML ✅ DONE
 
 - ✅ NPC dialogue lines already in YAML (done in 5a)
 - ✅ Room description variants (troll clearing) in YAML (done in 5b)
 - ✅ Item use flavour text in YAML (done in 5b)
-- [ ] Move banner / intro text to YAML game metadata
+- ✅ Moved banner / intro text to YAML game metadata
+  - New `Meta` struct in `game_state.rs` (title, subtitle, tagline, banner, intro)
+  - `banner` field uses YAML `|4` block scalar for ASCII art
+  - `intro` uses `{bold:text}` template syntax for emphasis
+  - `print_banner()` now reads from `state.meta` instead of hardcoded text
+- ✅ Added `art` field to room YAML schema (file path to `.ans` art)
+  - Engine loads art from file if `art` is set, falls back to built-in `art.rs`
+  - Prepares for future image-to-ANSI pipeline
 
 ### 5d — Validation & Documentation
 
@@ -163,9 +170,46 @@ play any game defined in this format.
 
 ---
 
+## Iteration 6 — Image-to-ANSI Art Converter
+
+**Goal:** A self-contained Rust tool that converts PNG/JPEG images into
+half-block ANSI art `.ans` files. This allows an agent (or human author)
+to provide source images for room illustrations and have them automatically
+converted during game setup, rather than hand-crafting ANSI art.
+
+### 6a — Core converter binary
+
+- [ ] Add `image` crate as an optional dependency
+- [ ] New binary: `cargo run --bin img2ans -- <input> <output> [options]`
+- [ ] Load PNG/JPEG, resize to target dimensions (e.g. `--width 50 --height 11`)
+- [ ] Render pixel pairs as Unicode half-block characters (▀▄█) with 256-colour
+  or 24-bit ANSI foreground/background codes
+- [ ] Write output as a plain text `.ans` file (ready to reference from `game.yaml`)
+- [ ] Support `--palette` option: `truecolor` (default), `256`, `16` for
+  different terminal compatibility levels
+
+### 6b — Batch conversion & YAML integration
+
+- [ ] Support converting all images in a directory:
+  `cargo run --bin img2ans -- --batch art/source/ art/`
+- [ ] Optional `art_image` field in room YAML schema — points to a source
+  image; a build/setup step converts it to `.ans` automatically
+- [ ] Setup script / `cargo run --bin setup` that scans `game.yaml` for
+  `art_image` references and runs the converter for each one
+
+### 6c — Quality tuning
+
+- [ ] Dithering options (none, Floyd-Steinberg, ordered)
+- [ ] Brightness / contrast adjustment
+- [ ] Optional border/frame around art
+- [ ] Preview mode: convert and display in terminal without writing a file
+
+---
+
 ## Tech Notes
 
 - Pure Rust, no external crates for iteration 1 (just `std`)
 - `serde` + `serde_yaml` added in iteration 5
+- `image` crate added in iteration 6 (optional, only for the converter binary)
 - `cargo run` to play (loads `game.yaml` from working directory)
 - Designed for easy extension — games defined as YAML data, not code

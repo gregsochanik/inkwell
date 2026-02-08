@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::game_state::{Direction, GameState, Item, Npc, Room};
+use crate::game_state::{Direction, GameState, Item, Meta, Npc, Room};
 
 /// Build the initial game state with all rooms, items, and connections.
 #[allow(dead_code)] // retained as fallback; YAML loader is used at runtime
@@ -26,6 +26,7 @@ pub fn build_world() -> GameState {
             exits: bag_end_exits,
             items: vec!["map"],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -48,6 +49,7 @@ pub fn build_world() -> GameState {
             exits: hill_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -68,6 +70,7 @@ pub fn build_world() -> GameState {
             exits: inn_exits,
             items: vec!["elven_bread"],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -89,6 +92,7 @@ pub fn build_world() -> GameState {
             exits: trollshaw_exits,
             items: vec!["sword"],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -110,6 +114,7 @@ pub fn build_world() -> GameState {
             exits: troll_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -131,6 +136,7 @@ pub fn build_world() -> GameState {
             exits: rivendell_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -152,6 +158,7 @@ pub fn build_world() -> GameState {
             exits: misty_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -175,6 +182,7 @@ pub fn build_world() -> GameState {
             exits: goblin_exits,
             items: vec!["ring"],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -200,6 +208,7 @@ pub fn build_world() -> GameState {
             exits: beorn_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -224,6 +233,7 @@ pub fn build_world() -> GameState {
             exits: mirkwood_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -247,6 +257,7 @@ pub fn build_world() -> GameState {
             exits: lake_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -269,6 +280,7 @@ pub fn build_world() -> GameState {
             exits: mountain_exits,
             items: vec![],
             conditional_descriptions: vec![],
+            art: None,
         },
     );
 
@@ -490,6 +502,13 @@ pub fn build_world() -> GameState {
     visited_rooms.insert("bag_end");
 
     GameState {
+        meta: Meta {
+            title: "HOBITTY",
+            subtitle: "An 80s Text Adventure in Rust",
+            tagline: "Loosely based on The Hobbit (1982)",
+            banner: "",
+            intro: "",
+        },
         rooms,
         items,
         npcs,

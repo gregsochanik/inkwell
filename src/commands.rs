@@ -141,8 +141,11 @@ fn cmd_look(state: &GameState) -> String {
     let room_id = state.current_room;
     let mut text = String::from("\n");
 
-    // Show room art if available
-    if let Some(room_art) = art::get_room_art(room_id) {
+    // Show room art: check YAML-referenced file first, fall back to built-in art
+    let room_art = state.current_room().art
+        .and_then(|path| std::fs::read_to_string(path).ok())
+        .or_else(|| art::get_room_art(room_id));
+    if let Some(room_art) = room_art {
         text.push_str(&room_art);
         text.push('\n');
     }

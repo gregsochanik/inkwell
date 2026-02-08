@@ -106,6 +106,19 @@ pub struct PendingRiddle {
     pub question_index: usize,
 }
 
+// ── Game metadata ──────────────────────────────────────────────────
+
+/// Static game metadata loaded from the YAML definition.
+#[derive(Debug, Clone)]
+pub struct Meta {
+    #[allow(dead_code)] // available for window titles, save files, etc.
+    pub title: &'static str,
+    pub subtitle: &'static str,
+    pub tagline: &'static str,
+    pub banner: &'static str,
+    pub intro: &'static str,
+}
+
 // ── Core game types ────────────────────────────────────────────────
 
 /// A room / location in the game world.
@@ -122,6 +135,8 @@ pub struct Room {
     pub items: Vec<ItemId>,
     /// Description overrides based on game state.
     pub conditional_descriptions: Vec<ConditionalDesc>,
+    /// Path to an external .ans art file (optional).
+    pub art: Option<&'static str>,
 }
 
 /// An item that can be picked up, dropped, and examined.
@@ -170,6 +185,7 @@ pub enum Command {
 
 /// The full mutable game state.
 pub struct GameState {
+    pub meta: Meta,
     pub rooms: HashMap<RoomId, Room>,
     pub items: HashMap<ItemId, Item>,
     pub npcs: HashMap<NpcId, Npc>,

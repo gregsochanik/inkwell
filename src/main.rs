@@ -12,13 +12,13 @@ mod world;
 use std::io::{self, Write};
 
 fn main() {
-    print_banner();
-
     let mut state = loader::load_game_yaml("game.yaml")
         .unwrap_or_else(|e| {
             eprintln!("Failed to load game: {}", e);
             std::process::exit(1);
         });
+
+    print_banner(&state);
 
     // Show the starting room
     println!("{}", commands::execute(&game_state::Command::Look, &mut state));
@@ -83,41 +83,46 @@ fn main() {
     }
 }
 
-fn print_banner() {
-    print!("\n{}{}", color::BOLD, color::CYAN);
-    println!(r#"================================================================"#);
-    println!(r#"     _   _  ___  ____ ___ _____ _______   __"#);
-    println!(r#"    | | | |/ _ \| __ )_ _|_   _|_   _\ \ / /"#);
-    println!(r#"    | |_| | | | |  _ \| |  | |   | |  \ V /"#);
-    println!(r#"    |  _  | |_| | |_) | |  | |   | |   | |"#);
-    println!(r#"    |_| |_|\___/|____/___| |_|   |_|   |_|"#);
-    print!("{}", color::RESET);
-    println!();
+fn print_banner(state: &game_state::GameState) {
+    let m = &state.meta;
+    let sep = "================================================================";
+
+    // Title banner
     println!(
-        "{}        An 80s Text Adventure in Rust{}",
-        color::YELLOW, color::RESET
+        "\n{}{}{}{}",
+        color::BOLD, color::CYAN, sep, color::RESET
     );
+    if !m.banner.is_empty() {
+        print!(
+            "{}{}{}{}",
+            color::BOLD,
+            color::CYAN,
+            m.banner.trim_end(),
+            color::RESET
+        );
+        println!();
+    }
+    // Subtitle / tagline
+    if !m.subtitle.is_empty() {
+        println!(
+            "{}        {}{}",
+            color::YELLOW, m.subtitle, color::RESET
+        );
+    }
+    if !m.tagline.is_empty() {
+        println!(
+            "{}     {}{}",
+            color::DIM, m.tagline, color::RESET
+        );
+    }
     println!(
-        "{}     Loosely based on The Hobbit (1982){}",
-        color::DIM, color::RESET
+        "{}{}{}{}",
+        color::BOLD, color::CYAN, sep, color::RESET
     );
-    println!(
-        "{}{}================================================================{}",
-        color::BOLD, color::CYAN, color::RESET
-    );
-    println!();
-    println!("In a hole in the ground there lived a hobbit. Not a nasty,");
-    println!("dirty, wet hole — it was a hobbit-hole, and that means comfort.");
-    println!();
-    println!(
-        "You are {}Dobo Daggins{}, a respectable hobbit of {}Bag End{}. One",
-        color::BOLD, color::RESET, color::BOLD, color::RESET
-    );
-    println!("morning a wizard and thirteen dwarves arrive at your door and");
-    println!("before you know it, you've been swept up in an adventure.");
-    println!();
-    println!(
-        "Type {}HELP{} for a list of commands.",
-        color::BOLD, color::RESET
-    );
+
+    // Intro text (supports {bold:text} templates)
+    if !m.intro.is_empty() {
+        println!();
+        println!("{}", triggers::process_template(m.intro));
+    }
 }

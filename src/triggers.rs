@@ -45,6 +45,11 @@ pub fn process_template(text: &str) -> String {
 
             if let Some((typ, content)) = tag.split_once(':') {
                 match typ {
+                    "bold" => {
+                        result.push_str(color::BOLD);
+                        result.push_str(content);
+                        result.push_str(color::RESET);
+                    }
                     "npc" => result.push_str(&color::npc(content)),
                     "item" => result.push_str(&color::item(content)),
                     "dialogue" => result.push_str(&color::dialogue(content)),

@@ -10,7 +10,7 @@ use std::fs;
 use serde::Deserialize;
 
 use crate::game_state::{
-    Condition, ConditionalDesc, Direction, Effect, GameState, Item, Npc,
+    Condition, ConditionalDesc, Direction, Effect, GameState, Item, Meta, Npc,
     RiddleDef, RiddleQuestion, Room, Trigger,
 };
 
@@ -30,13 +30,15 @@ pub struct GameDef {
 }
 
 #[derive(Deserialize)]
-#[allow(dead_code)] // fields consumed in iteration 5c
 pub struct GameMeta {
     pub title: String,
+    #[serde(default)]
     pub subtitle: String,
     #[serde(default)]
     pub tagline: String,
     pub start_room: String,
+    #[serde(default)]
+    pub banner: String,
     #[serde(default)]
     pub intro: String,
 }
@@ -55,6 +57,9 @@ pub struct RoomDef {
     pub items: Vec<String>,
     #[serde(default)]
     pub conditional_descriptions: Vec<ConditionalDescDef>,
+    /// Path to an external .ans art file.
+    #[serde(default)]
+    pub art: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -266,6 +271,7 @@ pub fn build_state(def: GameDef) -> Result<GameState, String> {
             exits,
             items: room_items,
             conditional_descriptions,
+            art: room_def.art.map(|s| leak(s)),
         });
     }
 
@@ -317,6 +323,15 @@ pub fn build_state(def: GameDef) -> Result<GameState, String> {
         });
     }
 
+    // -- Meta --
+    let meta = Meta {
+        title: leak(def.game.title),
+        subtitle: leak(def.game.subtitle),
+        tagline: leak(def.game.tagline),
+        banner: leak(def.game.banner),
+        intro: leak(def.game.intro),
+    };
+
     // -- Assemble GameState --
     let start_room = leak(def.game.start_room);
 
@@ -328,6 +343,7 @@ pub fn build_state(def: GameDef) -> Result<GameState, String> {
     visited_rooms.insert(start_room);
 
     Ok(GameState {
+        meta,
         rooms,
         items,
         npcs,

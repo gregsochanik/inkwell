@@ -6,9 +6,23 @@ game:
   subtitle: "An 80s Text Adventure in Rust"
   tagline: "Loosely based on The Hobbit (1982)"
   start_room: bag_end
+  banner: |4
+             _   _  ___  ____ ___ _____ _______   __
+            | | | |/ _ \| __ )_ _|_   _|_   _\ \ / /
+            | |_| | | | |  _ \| |  | |   | |  \ V /
+            |  _  | |_| | |_) | |  | |   | |   | |
+            |_| |_|\___/|____/___| |_|   |_|   |_|
   intro: >-
     In a hole in the ground there lived a hobbit. Not a nasty,
     dirty, wet hole — it was a hobbit-hole, and that means comfort.
+
+
+    You are {bold:Dobo Daggins}, a respectable hobbit of {bold:Bag End}. One
+    morning a wizard and thirteen dwarves arrive at your door and
+    before you know it, you've been swept up in an adventure.
+
+
+    Type {bold:HELP} for a list of commands.
 
 # -------------------------------------------------------------------
 # Rooms
