@@ -6,8 +6,13 @@ use crate::game_state::GameState;
 use crate::loader;
 use crate::triggers;
 
-const SAVE_FILE: &str = "hobitty.sav";
+const SAVE_FILENAME: &str = "save.dat";
 const SAVE_VERSION: &str = "HOBITTY_SAVE_V1";
+
+/// Build the full save file path inside the game directory.
+fn save_path(game_dir: &str) -> String {
+    format!("{}/{}", game_dir, SAVE_FILENAME)
+}
 
 pub fn save_game(state: &GameState) -> Result<String, String> {
     let mut lines = Vec::new();
@@ -51,14 +56,16 @@ pub fn save_game(state: &GameState) -> Result<String, String> {
         }
     }
 
-    fs::write(SAVE_FILE, lines.join("\n"))
+    let path = save_path(&state.game_dir);
+    fs::write(&path, lines.join("\n"))
         .map_err(|e| format!("Failed to save: {}", e))?;
 
-    Ok(format!("Game saved to '{}'.", SAVE_FILE))
+    Ok(format!("Game saved to '{}'.", path))
 }
 
-pub fn load_game() -> Result<GameState, String> {
-    let content = fs::read_to_string(SAVE_FILE)
+pub fn load_game(game_dir: &str) -> Result<GameState, String> {
+    let path = save_path(game_dir);
+    let content = fs::read_to_string(&path)
         .map_err(|_| "No save file found. Use SAVE to save your game first.".to_string())?;
 
     let lines: Vec<&str> = content.lines().collect();
@@ -67,7 +74,8 @@ pub fn load_game() -> Result<GameState, String> {
         return Err("Save file is corrupted or from a different version.".to_string());
     }
 
-    let mut state = loader::load_game_yaml("game.yaml")
+    let game_file = format!("{}/game.yaml", game_dir);
+    let mut state = loader::load_game_yaml(&game_file, game_dir)
         .map_err(|e| format!("Cannot load game definition: {}", e))?;
 
     for line in &lines[1..] {

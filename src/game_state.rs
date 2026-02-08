@@ -185,6 +185,8 @@ pub enum Command {
 
 /// The full mutable game state.
 pub struct GameState {
+    /// Directory containing the game definition (for resolving relative paths).
+    pub game_dir: String,
     pub meta: Meta,
     pub rooms: HashMap<RoomId, Room>,
     pub items: HashMap<ItemId, Item>,

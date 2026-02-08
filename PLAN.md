@@ -159,14 +159,37 @@ play any game defined in this format.
   - Engine loads art from file if `art` is set, falls back to built-in `art.rs`
   - Prepares for future image-to-ANSI pipeline
 
-### 5d — Validation & Documentation
+### 5d — Validation & Documentation ✅ DONE
 
-- [ ] YAML schema validation on load (missing rooms, broken exit references,
-  missing items, etc.) with clear error messages
-- [ ] Write a short `AUTHORING.md` guide: how to create a new game using
-  the YAML format
-- [ ] Create a minimal example game YAML (not Hobitty) to prove the engine
-  is truly generic
+- ✅ YAML schema validation on load with clear error messages:
+  - **Errors** (fatal): broken exit refs, missing items/rooms/NPCs in
+    triggers/effects, empty riddles, invalid start room
+  - **Warnings** (printed): missing allowed rooms, missing art files,
+    empty NPC dialogue, unknown trigger events, orphaned items
+- ✅ `AUTHORING.md` guide: complete reference for creating games — rooms,
+  items, NPCs, triggers, conditions, effects, riddles, text templates, art
+- ✅ `example.yaml`: "The Locked Tower" — a 3-room escape game proving the
+  engine is fully generic (cell → corridor → tower top, with pin puzzle,
+  ghost riddle, rope escape)
+- ✅ Fixed `cmd_use` to check triggers before inventory (allows room scenery
+  interactions like `use rope`); added `!has_item` conditions to Hobitty's
+  use triggers for proper inventory gating
+- ✅ Made `!win` effect text generic (game-specific flavour in YAML, engine
+  adds the congratulations frame)
+
+### 5e — Game Directory Convention & CLI ✅ DONE
+
+- ✅ Accept optional CLI argument: `cargo run -- <game-directory>`
+  - No argument defaults to current directory (backward compat)
+  - Engine looks for `game.yaml` inside the given directory
+  - Usage hint shown on load failure
+- ✅ All relative paths (art files, save files) resolve from game directory
+  - Save file renamed to `save.dat`, stored alongside `game.yaml`
+  - Art file paths in YAML validated relative to game directory
+- ✅ Games organised in `examples/` directory:
+  - `examples/hobitty/game.yaml` — the main Hobbit-inspired adventure
+  - `examples/locked_tower/game.yaml` — minimal escape game demo
+- ✅ `GameState.game_dir` field stores the active game directory at runtime
 
 ---
 
@@ -211,5 +234,5 @@ converted during game setup, rather than hand-crafting ANSI art.
 - Pure Rust, no external crates for iteration 1 (just `std`)
 - `serde` + `serde_yaml` added in iteration 5
 - `image` crate added in iteration 6 (optional, only for the converter binary)
-- `cargo run` to play (loads `game.yaml` from working directory)
+- `cargo run -- examples/hobitty` to play (or any game directory with `game.yaml`)
 - Designed for easy extension — games defined as YAML data, not code

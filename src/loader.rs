@@ -10,9 +10,10 @@ use std::fs;
 use serde::Deserialize;
 
 use crate::game_state::{
-    Condition, ConditionalDesc, Direction, Effect, GameState, Item, Meta, Npc,
-    RiddleDef, RiddleQuestion, Room, Trigger,
+    Condition, ConditionalDesc, Direction, Effect, GameState, Item, Meta,
+    Npc, RiddleDef, RiddleQuestion, Room, Trigger,
 };
+// Effect is used in both build_state and validate
 
 // ── YAML schema types ──────────────────────────────────────────────
 
@@ -216,11 +217,17 @@ pub fn parse_yaml(yaml: &str) -> Result<GameDef, String> {
 }
 
 /// Load a YAML file and return a fully initialised GameState.
-pub fn load_game_yaml(path: &str) -> Result<GameState, String> {
+/// `game_dir` is the directory containing the game definition (for resolving
+/// relative paths like art files and save files).
+/// Runs schema validation after building; errors are fatal, warnings print to stderr.
+pub fn load_game_yaml(path: &str, game_dir: &str) -> Result<GameState, String> {
     let yaml = fs::read_to_string(path)
         .map_err(|e| format!("Cannot read '{}': {}", path, e))?;
     let def = parse_yaml(&yaml)?;
-    build_state(def)
+    let mut state = build_state(def)?;
+    state.game_dir = game_dir.to_string();
+    validate(&state)?;
+    Ok(state)
 }
 
 /// Convert a parsed GameDef into a playable GameState.
@@ -343,6 +350,7 @@ pub fn build_state(def: GameDef) -> Result<GameState, String> {
     visited_rooms.insert(start_room);
 
     Ok(GameState {
+        game_dir: ".".to_string(),
         meta,
         rooms,
         items,
@@ -357,4 +365,207 @@ pub fn build_state(def: GameDef) -> Result<GameState, String> {
         triggers,
         riddles,
     })
+}
+
+// ── Validation ─────────────────────────────────────────────────────
+
+/// Validate a built GameState for broken references and missing data.
+/// Returns Err with all errors joined if any are found.
+/// Warnings are printed to stderr but don't prevent loading.
+fn validate(state: &GameState) -> Result<(), String> {
+    let mut errors: Vec<String> = Vec::new();
+    let mut warnings: Vec<String> = Vec::new();
+
+    // -- Room exit destinations must exist --
+    for (room_id, room) in &state.rooms {
+        for (dir, &dest) in &room.exits {
+            if !state.rooms.contains_key(dest) {
+                errors.push(format!(
+                    "Room '{}': exit {} points to non-existent room '{}'",
+                    room_id, dir.name(), dest
+                ));
+            }
+        }
+
+        // -- Room items must be defined --
+        for &item_id in &room.items {
+            if !state.items.contains_key(item_id) {
+                errors.push(format!(
+                    "Room '{}': references non-existent item '{}'",
+                    room_id, item_id
+                ));
+            }
+        }
+
+        // -- Art file should exist on disk --
+        if let Some(art_path) = room.art {
+            let full_art = format!("{}/{}", state.game_dir, art_path);
+            if !std::path::Path::new(&full_art).exists() {
+                warnings.push(format!(
+                    "Room '{}': art file '{}' not found",
+                    room_id, art_path
+                ));
+            }
+        }
+    }
+
+    // -- NPC start rooms must exist --
+    for (npc_id, npc) in &state.npcs {
+        if npc.current_room != "nowhere" && !state.rooms.contains_key(npc.current_room) {
+            errors.push(format!(
+                "NPC '{}': start_room '{}' does not exist",
+                npc_id, npc.current_room
+            ));
+        }
+
+        for &room_id in &npc.allowed_rooms {
+            if !state.rooms.contains_key(room_id) {
+                warnings.push(format!(
+                    "NPC '{}': allowed_room '{}' does not exist",
+                    npc_id, room_id
+                ));
+            }
+        }
+
+        if npc.dialogue.is_empty() {
+            warnings.push(format!(
+                "NPC '{}': has no dialogue lines",
+                npc_id
+            ));
+        }
+    }
+
+    // -- Trigger validation --
+    let valid_events = ["go", "wait", "use", "attack", "talk_to", "pickup"];
+    for trigger in &state.triggers {
+        if !valid_events.contains(&trigger.event) {
+            warnings.push(format!(
+                "Trigger '{}': unknown event type '{}'",
+                trigger.id, trigger.event
+            ));
+        }
+
+        // Validate effects that reference rooms/items/NPCs
+        for effect in &trigger.effects {
+            validate_effect(effect, trigger.id, state, &mut errors);
+        }
+    }
+
+    // -- Riddle validation --
+    for (riddle_id, riddle) in &state.riddles {
+        if riddle.questions.is_empty() {
+            errors.push(format!(
+                "Riddle '{}': has no questions",
+                riddle_id
+            ));
+        }
+
+        // NPC must exist
+        if !state.npcs.contains_key(riddle.npc) {
+            warnings.push(format!(
+                "Riddle '{}': references NPC '{}' which does not exist",
+                riddle_id, riddle.npc
+            ));
+        }
+
+        // Validate win effects
+        for effect in &riddle.win_effects {
+            validate_effect(effect, &format!("riddle '{}'", riddle_id), state, &mut errors);
+        }
+    }
+
+    // -- Check that StartRiddle effects reference existing riddles --
+    for trigger in &state.triggers {
+        for effect in &trigger.effects {
+            if let Effect::StartRiddle(riddle_id) = effect {
+                if !state.riddles.contains_key(riddle_id) {
+                    errors.push(format!(
+                        "Trigger '{}': start_riddle references non-existent riddle '{}'",
+                        trigger.id, riddle_id
+                    ));
+                }
+            }
+        }
+    }
+
+    // -- Items defined but never placed --
+    for &item_id in state.items.keys() {
+        let placed = state.rooms.values().any(|r| r.items.contains(&item_id));
+        let in_trigger = state.triggers.iter().any(|t| {
+            t.effects.iter().any(|e| matches!(e, Effect::AddItem { item, .. } if *item == item_id))
+        });
+        let in_riddle = state.riddles.values().any(|r| {
+            r.win_effects.iter().any(|e| matches!(e, Effect::AddItem { item, .. } if *item == item_id))
+        });
+        if !placed && !in_trigger && !in_riddle {
+            warnings.push(format!(
+                "Item '{}': defined but never placed in any room, trigger, or riddle",
+                item_id
+            ));
+        }
+    }
+
+    // -- Print warnings --
+    for w in &warnings {
+        eprintln!("Warning: {}", w);
+    }
+
+    // -- Return errors --
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "Validation failed with {} error(s):\n  - {}",
+            errors.len(),
+            errors.join("\n  - ")
+        ))
+    }
+}
+
+/// Validate a single effect for broken references.
+fn validate_effect(
+    effect: &Effect,
+    context: &str,
+    state: &GameState,
+    errors: &mut Vec<String>,
+) {
+    match effect {
+        Effect::AddItem { room, item } => {
+            if !state.rooms.contains_key(room) {
+                errors.push(format!(
+                    "{}: add_item references non-existent room '{}'",
+                    context, room
+                ));
+            }
+            if !state.items.contains_key(item) {
+                errors.push(format!(
+                    "{}: add_item references non-existent item '{}'",
+                    context, item
+                ));
+            }
+        }
+        Effect::OpenExit { room, destination, .. } => {
+            if !state.rooms.contains_key(room) {
+                errors.push(format!(
+                    "{}: open_exit references non-existent room '{}'",
+                    context, room
+                ));
+            }
+            if !state.rooms.contains_key(destination) {
+                errors.push(format!(
+                    "{}: open_exit destination '{}' does not exist",
+                    context, destination
+                ));
+            }
+        }
+        Effect::RemoveNpc(npc_id) => {
+            if !state.npcs.contains_key(npc_id) {
+                errors.push(format!(
+                    "{}: remove_npc references non-existent NPC '{}'",
+                    context, npc_id
+                ));
+            }
+        }
+        _ => {}
+    }
 }

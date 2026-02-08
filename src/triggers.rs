@@ -146,14 +146,10 @@ pub fn execute_effects(effects: &[Effect], state: &mut GameState) -> String {
                 state.running = false;
                 let processed = process_template(text);
                 output = format!(
-                    "{}\n{bell}{success}\n\
+                    "{}\n\n\
+                     {bell}{success}\
                      ================================================================\n\
                      {pad:>20}CONGRATULATIONS!\n\
-                     \n\
-                     {pad:>4}You have completed HOBITTY: An 80s Text Adventure!\n\
-                     \n\
-                     {pad:>4}Dobo Daggins, burglar extraordinaire, has reclaimed\n\
-                     {pad:>4}the treasure of the Lonely Mountain.\n\
                      \n\
                      {pad:>4}Thank you for playing!\n\
                      ================================================================\n\

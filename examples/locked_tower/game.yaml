@@ -1,0 +1,229 @@
+# Example: The Locked Tower
+# A minimal 3-room game to demonstrate the Hobitty engine.
+# To play: copy to game.yaml and run `cargo run`.
+
+game:
+  title: "THE LOCKED TOWER"
+  subtitle: "A Mini Text Adventure"
+  start_room: cell
+  banner: |4
+      ╔╦╦╦╗
+      ║   ║
+      ║ ╔═╝
+      ║ ║
+      ╚═╝
+  intro: >-
+    You wake on a cold stone floor. Your head aches. The last thing
+    you remember is a hooded figure and a sweet-smelling cloth pressed
+    to your face.
+
+
+    You need to escape. Type {bold:HELP} for a list of commands.
+
+# -------------------------------------------------------------------
+rooms:
+  cell:
+    name: "The Cell"
+    description: >-
+      A damp stone cell with straw on the floor. Iron bars block the
+      way north. A rusty plate sits in the corner. Scratched into
+      the wall are the words: "THE ANSWER IS MOONLIGHT".
+    short_description: "You are in the cell."
+    exits:
+      north: corridor
+    items:
+      - pin
+
+  corridor:
+    name: "The Corridor"
+    description: >-
+      A narrow torch-lit corridor. The cell is behind you to the
+      south. A heavy oak door with a silver lock bars the way east.
+    short_description: "You are in the corridor."
+    conditional_descriptions:
+      - conditions:
+          - !flag_unset cell_open
+        description: >-
+          A narrow torch-lit corridor. The cell is behind you to the
+          south. But wait — iron bars block the passage south. You can't
+          go back. A heavy oak door with a silver lock bars the way east.
+        short_description: "You are in the corridor. Bars block the south."
+    exits:
+      south: cell
+      east: tower_top
+
+  tower_top:
+    name: "The Tower Top"
+    description: >-
+      Cold wind hits your face. You are at the top of a crumbling
+      tower. Stars fill the sky and far below you can see torchlight
+      on a road. A knotted rope hangs from the battlements.
+    short_description: "You are at the top of the tower."
+    exits:
+      west: corridor
+
+# -------------------------------------------------------------------
+items:
+  pin:
+    name: "a bent iron pin"
+    description: >-
+      A small iron pin, bent at one end. It might be useful for picking
+      a lock.
+
+  key:
+    name: "a silver key"
+    description: "A small silver key. It looks like it fits the oak door."
+
+# -------------------------------------------------------------------
+npcs:
+  rat:
+    name: "a large rat"
+    description: "A mangy rat with beady eyes. It watches you warily."
+    start_room: cell
+    allowed_rooms:
+      - cell
+      - corridor
+    dialogue:
+      - '"Squeak."'
+      - '"Squeak squeak."'
+      - '"The rat twitches its whiskers at you."'
+    idle_texts:
+      - "The rat gnaws on a piece of straw."
+      - "The rat scurries into a crack in the wall and back again."
+
+  ghost:
+    name: "a shimmering ghost"
+    description: >-
+      A translucent figure in tattered robes. It hovers silently,
+      regarding you with hollow eyes.
+    start_room: corridor
+    allowed_rooms:
+      - corridor
+    dialogue:
+      - '"I have waited so long for someone to answer my riddle..."'
+      - '"Answer correctly, and I shall give you the key to freedom."'
+    idle_texts:
+      - "The ghost drifts silently back and forth."
+      - "The ghost whispers something you can't quite hear."
+
+# -------------------------------------------------------------------
+triggers:
+  # -- Cell bars: block north until pin is used --
+  - id: bars_block
+    event: go
+    direction: north
+    conditions:
+      - !in_room cell
+      - !flag_unset cell_open
+    effects:
+      - !print >-
+          The iron bars are locked shut. You'll need to find a way
+          to pick the lock.
+
+  - id: use_pin
+    event: use
+    target: pin
+    conditions:
+      - !in_room cell
+      - !flag_unset cell_open
+    effects:
+      - !set_flag cell_open
+      - !bell ~
+      - !print >-
+          You work the bent pin into the lock. After a tense moment
+          there's a satisfying click. The bars swing open!
+          {exits:The way north is now open.}
+
+  - id: use_pin_generic
+    event: use
+    target: pin
+    effects:
+      - !print "You fiddle with the pin. Nothing happens."
+
+  # -- Oak door: block east until key is used --
+  - id: door_block
+    event: go
+    direction: east
+    conditions:
+      - !in_room corridor
+      - !flag_unset door_open
+    effects:
+      - !print >-
+          The heavy oak door is locked with a silver lock.
+          You'll need a key.
+
+  - id: use_key_door
+    event: use
+    target: key
+    conditions:
+      - !in_room corridor
+    effects:
+      - !set_flag door_open
+      - !bell ~
+      - !print >-
+          You turn the silver key in the lock. The oak door creaks open,
+          revealing stone steps spiralling upward.
+          {exits:The way east is now open.}
+
+  # -- Ghost riddle --
+  - id: talk_ghost_riddle
+    event: talk_to
+    target: ghost
+    conditions:
+      - !flag_unset riddle_solved
+    effects:
+      - !start_riddle ghost_riddle
+
+  # -- Escape: use rope at tower top --
+  - id: escape
+    event: use
+    target: rope
+    conditions:
+      - !in_room tower_top
+    effects:
+      - !win >-
+          You grab the knotted rope and lower yourself down the
+          outside of the tower. Hand over hand, stone by stone,
+          until your feet touch grass.
+
+          You are free.
+
+  # -- Attack rat --
+  - id: attack_rat
+    event: attack
+    target: rat
+    effects:
+      - !print >-
+          The rat is too quick. It dodges your clumsy swing and
+          squeaks indignantly.
+
+# -------------------------------------------------------------------
+riddles:
+  ghost_riddle:
+    npc: ghost
+    intro: >-
+      The ghost's hollow eyes fix on you.
+      {dialogue:"Answer me this, prisoner, and I shall reward you."}
+    questions:
+      - question: |
+          "I have no body, but I come alive at night.
+            I disappear at dawn. What am I?"
+        answer: moonlight
+    correct_response: >-
+      {dialogue:"Well done... few have answered correctly."}
+    win_text: >-
+      The ghost smiles — a sad, ancient smile. It reaches into its
+      robes and produces {item:a silver key}, which clatters to the
+      floor as the ghost fades away.
+    win_effects:
+      - !set_flag riddle_solved
+      - !add_item
+        room: corridor
+        item: key
+      - !remove_npc ghost
+    lose_text: >-
+      {dialogue:"Wrong."} The ghost's form darkens.
+      A cold wind knocks you to the ground.
+    lose_hint: >-
+      The ghost's disappointment was fatal.
+      Perhaps the scratches on your cell wall held a clue.

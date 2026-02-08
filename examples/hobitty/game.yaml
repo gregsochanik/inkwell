@@ -483,6 +483,7 @@ triggers:
     event: use
     target: key
     conditions:
+      - !has_item key
       - !in_room lonely_mountain
       - !has_item map
     effects:
@@ -495,10 +496,13 @@ triggers:
 
           You have found the dragon's hoard of Erebor!
 
+          Dobo Daggins, burglar extraordinaire, has reclaimed the treasure of the Lonely Mountain.
+
   - id: use_key_no_map
     event: use
     target: key
     conditions:
+      - !has_item key
       - !in_room lonely_mountain
     effects:
       - !print >-
@@ -508,12 +512,16 @@ triggers:
   - id: use_key_generic
     event: use
     target: key
+    conditions:
+      - !has_item key
     effects:
       - !print "There is nothing to use the key on here."
 
   - id: use_ring
     event: use
     target: ring
+    conditions:
+      - !has_item ring
     effects:
       - !print >-
           You slip the ring onto your finger. The world dims
@@ -524,18 +532,24 @@ triggers:
   - id: use_sword
     event: use
     target: sword
+    conditions:
+      - !has_item sword
     effects:
       - !print "You draw the elvish blade. It hums faintly."
 
   - id: use_sting
     event: use
     target: sting
+    conditions:
+      - !has_item sword
     effects:
       - !print "You draw the elvish blade. It hums faintly."
 
   - id: use_bread
     event: use
     target: bread
+    conditions:
+      - !has_item elven_bread
     effects:
       - !print >-
           You take a bite of the elven bread. It fills you
@@ -545,6 +559,7 @@ triggers:
     event: use
     target: map
     conditions:
+      - !has_item map
       - !in_room lonely_mountain
     effects:
       - !print >-
@@ -556,6 +571,8 @@ triggers:
   - id: use_map_generic
     event: use
     target: map
+    conditions:
+      - !has_item map
     effects:
       - !print >-
           You study the weathered map. It shows the Lonely

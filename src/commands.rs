@@ -143,7 +143,10 @@ fn cmd_look(state: &GameState) -> String {
 
     // Show room art: check YAML-referenced file first, fall back to built-in art
     let room_art = state.current_room().art
-        .and_then(|path| std::fs::read_to_string(path).ok())
+        .and_then(|path| {
+            let full = format!("{}/{}", state.game_dir, path);
+            std::fs::read_to_string(full).ok()
+        })
         .or_else(|| art::get_room_art(room_id));
     if let Some(room_art) = room_art {
         text.push_str(&room_art);
@@ -342,7 +345,13 @@ fn cmd_wait(state: &mut GameState) -> String {
 }
 
 fn cmd_use(target: &str, state: &mut GameState) -> String {
-    // Try to find which item the player means
+    // Check triggers first — allows both inventory items and room scenery
+    // interactions (triggers should use !has_item conditions when needed)
+    if let Some(msg) = triggers::check_use(target, state) {
+        return msg;
+    }
+
+    // No trigger matched — check if the player has something by that name
     let has_item = state.inventory.iter().any(|&id| {
         id.contains(target)
             || state.items.get(id)
@@ -350,20 +359,13 @@ fn cmd_use(target: &str, state: &mut GameState) -> String {
                 .unwrap_or(false)
     });
 
-    if !has_item {
-        // Check if any item in the world matches (for a better error)
-        if item_exists_in_world(target, state) {
-            return format!("You don't have that.");
-        }
-        return format!("You're not sure how to use '{}'.", target);
+    if has_item {
+        format!("You're not sure how to use the {}.", target)
+    } else if item_exists_in_world(target, state) {
+        "You don't have that.".to_string()
+    } else {
+        format!("You can't use '{}' here.", target)
     }
-
-    // Check triggers
-    if let Some(msg) = triggers::check_use(target, state) {
-        return msg;
-    }
-
-    format!("You're not sure how to use the {}.", target)
 }
 
 fn cmd_attack(target: &str, state: &mut GameState) -> String {

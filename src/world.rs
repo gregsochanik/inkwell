@@ -502,6 +502,7 @@ pub fn build_world() -> GameState {
     visited_rooms.insert("bag_end");
 
     GameState {
+        game_dir: ".".to_string(),
         meta: Meta {
             title: "HOBITTY",
             subtitle: "An 80s Text Adventure in Rust",

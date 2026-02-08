@@ -12,9 +12,15 @@ mod world;
 use std::io::{self, Write};
 
 fn main() {
-    let mut state = loader::load_game_yaml("game.yaml")
+    let args: Vec<String> = std::env::args().collect();
+    let game_dir = if args.len() > 1 { &args[1] } else { "." };
+
+    let game_file = format!("{}/game.yaml", game_dir);
+    let mut state = loader::load_game_yaml(&game_file, game_dir)
         .unwrap_or_else(|e| {
             eprintln!("Failed to load game: {}", e);
+            eprintln!("\nUsage: cargo run -- <game-directory>");
+            eprintln!("  e.g. cargo run -- examples/hobitty");
             std::process::exit(1);
         });
 
@@ -49,7 +55,7 @@ fn main() {
             continue;
         }
         if trimmed == "load" || trimmed == "restore" {
-            match save::load_game() {
+            match save::load_game(&state.game_dir) {
                 Ok(loaded) => {
                     state = loaded;
                     println!("Game loaded successfully!");
