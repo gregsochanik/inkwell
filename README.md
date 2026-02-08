@@ -89,9 +89,7 @@ src/
   parser.rs        Text input parser
   npc.rs           NPC idle behaviour and movement
   save.rs          Save/load game state
-  art.rs           Built-in ANSI room art (fallback if no .ans file)
   color.rs         Terminal colour constants
-  world.rs         Legacy hardcoded world (dead code, kept for reference)
 examples/          Game directories
 PLAN.md            Development roadmap
 AUTHORING.md       Game authoring guide

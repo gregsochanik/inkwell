@@ -1,4 +1,3 @@
-use crate::art;
 use crate::color;
 use crate::game_state::{Command, Direction, GameState, ItemId, RoomId};
 use crate::triggers;
@@ -141,16 +140,13 @@ fn cmd_look(state: &GameState) -> String {
     let room_id = state.current_room;
     let mut text = String::from("\n");
 
-    // Show room art: check YAML-referenced file first, fall back to built-in art
-    let room_art = state.current_room().art
-        .and_then(|path| {
-            let full = format!("{}/{}", state.game_dir, path);
-            std::fs::read_to_string(full).ok()
-        })
-        .or_else(|| art::get_room_art(room_id));
-    if let Some(room_art) = room_art {
-        text.push_str(&room_art);
-        text.push('\n');
+    // Show room art from YAML-referenced .ans file
+    if let Some(art_path) = state.current_room().art {
+        let full = format!("{}/{}", state.game_dir, art_path);
+        if let Ok(room_art) = std::fs::read_to_string(full) {
+            text.push_str(&room_art);
+            text.push('\n');
+        }
     }
 
     text.push_str(&color::room_title(&format!("--- {} ---", room.name)));

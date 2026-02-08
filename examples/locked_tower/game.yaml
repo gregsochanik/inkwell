@@ -1,6 +1,5 @@
 # Example: The Locked Tower
 # A minimal 3-room game to demonstrate the adventure engine.
-# To play: copy to game.yaml and run `cargo run`.
 
 game:
   title: "THE LOCKED TOWER"

@@ -36,6 +36,7 @@ rooms:
       pantry jars, and maps. A warm fire crackles in the hearth.
       There is a strong smell of seed-cake.
     short_description: "You are back in the cosy comfort of Bag End."
+    art: art/bag_end.ans
     exits:
       east: the_hill
     items:
@@ -49,6 +50,7 @@ rooms:
       path leads south toward a cheerful inn, and east toward dark
       woods.
     short_description: "You stand on the Hill, overlooking the Shire."
+    art: art/the_hill.ans
     exits:
       west: bag_end
       south: green_dragon
@@ -62,6 +64,7 @@ rooms:
       behind the counter. Songs drift from a corner table. The door
       leads back north to the Hill.
     short_description: "You are in the warm and noisy Green Dragon Inn."
+    art: art/green_dragon.ans
     exits:
       north: the_hill
     items:

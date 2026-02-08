@@ -19,9 +19,7 @@ src/
   parser.rs        Text input → Command enum
   npc.rs           NPC idle behaviour and movement AI
   save.rs          Save/load game state to file (stored in game directory)
-  art.rs           Built-in ANSI half-block room art (fallback)
   color.rs         ANSI escape code constants
-  world.rs         Legacy hardcoded world builder (dead code, kept for reference)
 examples/
   hobitty/         Hobbit-inspired adventure (the original game)
   locked_tower/    Minimal 3-room demo game
@@ -75,5 +73,4 @@ cargo run -- examples/locked_tower
 ## What NOT to do
 
 - Don't hardcode game-specific logic in Rust — use YAML triggers.
-- Don't modify `world.rs` — it's legacy dead code.
 - Don't commit `save.dat` files.

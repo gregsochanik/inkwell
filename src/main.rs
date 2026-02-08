@@ -1,4 +1,3 @@
-mod art;
 mod color;
 mod commands;
 mod game_state;
@@ -7,7 +6,6 @@ mod npc;
 mod parser;
 mod save;
 mod triggers;
-mod world;
 
 use std::io::{self, Write};
 
