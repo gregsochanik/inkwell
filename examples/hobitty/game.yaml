@@ -78,6 +78,7 @@ rooms:
       distinctly unwelcome here. The way continues east, or you
       can retreat west.
     short_description: "You are in the dim depths of Trollshaw Forest."
+    art: art/trollshaw.ans
     exits:
       west: the_hill
       east: troll_clearing
@@ -92,6 +93,7 @@ rooms:
       of trolls turned to stone at dawn. A faint path leads north
       toward distant waterfalls.
     short_description: "You are in the Troll Clearing. Stone trolls loom nearby."
+    art: art/troll_clearing.ans
     conditional_descriptions:
       - conditions:
           - !flag_unset trolls_defeated
@@ -115,6 +117,7 @@ rooms:
       pools below. You feel rested and safe — for now. A steep
       path climbs east into the mountains.
     short_description: "You are in Rivendell. Elven music drifts on the breeze."
+    art: art/rivendell.ans
     exits:
       south: troll_clearing
       east: misty_pass
@@ -127,6 +130,7 @@ rooms:
       The path is treacherous. A dark crack in the rock leads east
       into the mountain itself.
     short_description: "You are on the treacherous Misty Mountains Pass."
+    art: art/misty_pass.ans
     exits:
       west: rivendell
       east: goblin_cave
@@ -138,6 +142,7 @@ rooms:
       the ceiling and the air smells foul. Strange eyes glint in
       the darkness. On the floor, something glimmers faintly.
     short_description: "You are in the dark Goblin Cave. Water drips around you."
+    art: art/goblin_cave.ans
     description_when_empty: >-
       A damp, dark cave deep inside the mountain. Water drips from
       the ceiling and the air smells foul. Strange eyes glint in
@@ -157,6 +162,7 @@ rooms:
       of honey and fresh hay. The mountains rise behind you to
       the west, and open lands stretch east.
     short_description: "You are in Beorn's wide valley. His great hall stands nearby."
+    art: art/beorns_hall.ans
     exits:
       west: goblin_cave
       east: mirkwood
@@ -171,6 +177,7 @@ rooms:
       weaves east through the trees. Every instinct tells you not to
       leave it.
     short_description: "You are in the dark depths of Mirkwood. Cobwebs hang overhead."
+    art: art/mirkwood.ans
     exits:
       west: beorns_hall
       east: lake_town
@@ -185,6 +192,7 @@ rooms:
       Mountain rises like a dark tower against the sky, a thin
       wisp of smoke curling from its peak.
     short_description: "You are in Lake-town. The Lonely Mountain looms to the east."
+    art: art/lake_town.ans
     exits:
       west: mirkwood
       east: lonely_mountain
@@ -198,6 +206,7 @@ rooms:
       lies a secret door. Dragon-smoke drifts from a vent high
       above. The air is hot and smells of sulphur.
     short_description: "You stand before the Lonely Mountain. Dragon-smoke drifts above."
+    art: art/lonely_mountain.ans
     exits:
       west: lake_town
 
