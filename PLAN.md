@@ -1,4 +1,4 @@
-# Hobitty - An 80s Text Adventure in Rust
+# Inkwell — A Text Adventure Engine in Rust
 
 ## Overview
 
@@ -90,7 +90,7 @@ src/
   item names (yellow), exits (bold), death text (bright red), win text (bright yellow),
   riddle text (italic magenta), NPC dialogue (green), coloured title banner
 - ✅ Save / load game state — SAVE and LOAD commands, custom line-based format
-  (`hobitty.sav`), handles full state reconstruction including room items, NPC
+  (`save.dat`), handles full state reconstruction including room items, NPC
   positions, puzzle flags, inventory, and visited rooms
 - ✅ Sound effects via terminal bell — bell on game over, win, troll puzzle solved,
   and picking up the ring
@@ -115,7 +115,7 @@ play any game defined in this format.
 
 - ✅ Added `serde` + `serde_yaml` crates
 - ✅ Designed YAML schema: game metadata, rooms, items, NPCs
-- ✅ Created `game.yaml` with all existing Hobitty content
+- ✅ Created `game.yaml` with all existing game content
 - ✅ New `src/loader.rs` module: parse YAML → `GameState` (uses `Box::leak`
   to convert `String` → `&'static str`, keeping all engine code unchanged)
 - ✅ Replaced `world::build_world()` with YAML loader in `main.rs` and `save.rs`
@@ -172,7 +172,7 @@ play any game defined in this format.
   engine is fully generic (cell → corridor → tower top, with pin puzzle,
   ghost riddle, rope escape)
 - ✅ Fixed `cmd_use` to check triggers before inventory (allows room scenery
-  interactions like `use rope`); added `!has_item` conditions to Hobitty's
+  interactions like `use rope`); added `!has_item` conditions to the Hobbit game's
   use triggers for proper inventory gating
 - ✅ Made `!win` effect text generic (game-specific flavour in YAML, engine
   adds the congratulations frame)

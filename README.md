@@ -1,4 +1,4 @@
-# Hobitty — A Text Adventure Engine in Rust
+# Inkwell — A Text Adventure Engine in Rust
 
 A data-driven text adventure engine where games are defined entirely in YAML.
 The Rust engine handles text parsing, room navigation, inventory, NPCs,
@@ -46,7 +46,7 @@ Type commands at the `>` prompt:
 
 ## Included games
 
-### Hobitty (`examples/hobitty/`)
+### Hobitty (`examples/hobitty/`) — the original game
 
 A ~10 room adventure loosely based on The Hobbit. Collect items, outwit
 trolls, solve riddles, and find the treasure of the Lonely Mountain.

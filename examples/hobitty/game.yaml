@@ -1,4 +1,4 @@
-# Hobitty — game definition
+# Hobitty — a Hobbit-inspired text adventure for the Inkwell engine
 # All game content is defined here; the Rust engine is generic.
 
 game:
