@@ -1,0 +1,505 @@
+# The Captain's Treasure — a pirate adventure for the Inkwell engine
+
+game:
+  title: "THE CAPTAIN'S TREASURE"
+  subtitle: "A Pirate Text Adventure"
+  tagline: "Find the treasure before the tide comes in!"
+  start_room: cave_mouth
+  banner: |4
+                _____
+               /     \
+              | () () |
+               \  ^  /
+                |||||
+  intro: >-
+    The other kids said you were crazy. "Nobody goes into Skull Cave,"
+    they said. "Not at low tide, not ever." But you heard the stories —
+    a pirate ship, trapped in the cave for a hundred years, and somewhere
+    aboard, {bold:Captain Blackwood's treasure}.
+
+
+    The tide is out, but it won't stay that way for long. You've squeezed
+    through the rocks and now you're standing at the mouth of the cave,
+    salt spray on your face and darkness ahead.
+
+
+    Type {bold:HELP} for a list of commands.
+
+# -------------------------------------------------------------------
+# Rooms
+# -------------------------------------------------------------------
+rooms:
+  cave_mouth:
+    name: "Cave Mouth"
+    description: >-
+      A wide rocky entrance where the sea meets the cave. Daylight
+      streams in behind you, glinting off tidal pools. Barnacles and
+      seaweed cling to the walls. Ahead to the north, looming in the
+      gloom, you can make out the dark shape of a ship wedged between
+      the cave walls. Water laps gently at its hull. The tide is low
+      but you can see the high-water mark far above your head.
+    short_description: "You are at the cave mouth. The ship looms to the north."
+    exits:
+      north: main_deck
+
+  main_deck:
+    name: "Main Deck"
+    description: >-
+      You stand on the weather-beaten deck of an old pirate ship. The
+      masts are broken stumps and the rigging hangs in rotten tangles.
+      Crab shells and dried seaweed litter the planks. The ship is
+      tilted slightly to one side, making the deck uneven under your
+      feet. A heavy door leads north to what must be the captain's
+      cabin. The forecastle rises to the east, and a narrow
+      companionway leads west down to the galley. The cave mouth is
+      behind you to the south.
+    short_description: "You are on the main deck of the pirate ship."
+    conditional_descriptions:
+      - conditions:
+          - !flag_unset cabin_unlocked
+        description: >-
+          You stand on the weather-beaten deck of an old pirate ship.
+          The masts are broken stumps and the rigging hangs in rotten
+          tangles. Crab shells and dried seaweed litter the planks.
+          The ship is tilted slightly to one side, making the deck
+          uneven under your feet. A heavy door with a rusty iron lock
+          bars the way north to what must be the captain's cabin.
+          The forecastle rises to the east, and a narrow companionway
+          leads west down to the galley. The cave mouth is behind you
+          to the south.
+        short_description: "You are on the main deck. A locked door blocks the way north."
+    exits:
+      south: cave_mouth
+      east: forecastle
+      west: galley
+      north: captains_cabin
+
+  forecastle:
+    name: "The Forecastle"
+    description: >-
+      The raised front deck of the ship. A tattered flag hangs limply
+      from a pole — you can just make out a skull and crossbones. Old
+      cannon balls are stacked in a rusted pyramid and a broken
+      telescope lies on the deck. The railing is crusted with salt
+      and something has made a nest in the coiled ropes. The main
+      deck is back to the west.
+    short_description: "You are on the forecastle. A tattered pirate flag hangs above."
+    exits:
+      west: main_deck
+
+  galley:
+    name: "The Galley"
+    description: >-
+      A cramped ship's kitchen below deck. Pots and pans hang from
+      hooks on the low ceiling, swaying gently with the ship's tilt.
+      An overturned barrel has spilled something long since dried up
+      across the floor. Shelves line the walls, stacked with dusty
+      bottles and mouldy biscuit tins. A rusty key hangs on a nail
+      by the stove. The companionway back to the main deck is to
+      the east.
+    short_description: "You are in the galley. Pots swing overhead."
+    description_when_empty: >-
+      A cramped ship's kitchen below deck. Pots and pans hang from
+      hooks on the low ceiling, swaying gently with the ship's tilt.
+      An overturned barrel has spilled something long since dried up
+      across the floor. Shelves line the walls, stacked with dusty
+      bottles and mouldy biscuit tins. The nail by the stove is bare.
+      The companionway back to the main deck is to the east.
+    exits:
+      east: main_deck
+    items:
+      - rusty_key
+
+  captains_cabin:
+    name: "Captain's Cabin"
+    description: >-
+      A grand cabin with tall windows at the stern, now thick with
+      grime and salt crust. A heavy oak desk dominates the room,
+      covered in mouldy charts and a cracked compass. A moth-eaten
+      captain's coat still hangs on a hook by the door. Through a
+      low doorway to the east you can see steps leading down into
+      darkness — the cargo hold. The main deck is back through the
+      door to the south.
+    short_description: "You are in the captain's cabin. Mouldy charts cover the desk."
+    exits:
+      south: main_deck
+      east: cargo_hold
+
+  cargo_hold:
+    name: "The Cargo Hold"
+    description: >-
+      The lantern casts a warm glow across the cargo hold. Barrels
+      and crates are stacked against the walls, many of them split
+      open and empty. But in the far corner, half-buried under a
+      rotting sail, you can see the glint of something metallic —
+      a treasure chest, bound in brass and stamped with a skull.
+      Above you, an iron hatch is set into the ceiling, crusted
+      shut with salt. It looks like it might lead up and out of
+      the ship. The captain's cabin is back to the west.
+    short_description: "You are in the cargo hold. The lantern flickers warmly."
+    conditional_descriptions:
+      - conditions:
+          - !flag_unset cargo_lit
+        description: >-
+          Pitch darkness swallows you whole. You can hear water
+          dripping somewhere below and the creak of old timbers.
+          The air is thick and damp and smells of rot. You can't
+          see a thing — you'll need some kind of light. The
+          captain's cabin is back to the west.
+        short_description: "You are in the cargo hold. It is pitch dark."
+    exits:
+      west: captains_cabin
+
+# -------------------------------------------------------------------
+# Items
+# -------------------------------------------------------------------
+items:
+  rusty_key:
+    name: "a rusty iron key"
+    description: >-
+      A heavy iron key, spotted with rust but still sturdy. The
+      handle is shaped like an anchor. It looks like it fits a
+      big lock.
+
+  lantern:
+    name: "a battered ship's lantern"
+    description: >-
+      An old brass lantern with a cracked glass pane. Miraculously
+      there is still oil in it and the wick is dry. A small flint
+      striker is clipped to the side.
+
+  treasure:
+    name: "the captain's treasure chest"
+    description: >-
+      A heavy wooden chest bound in tarnished brass. The lock has
+      long since rusted open. Inside: gold doubloons, jewelled
+      rings, a ruby-encrusted dagger, and strings of pearls.
+      Captain Blackwood's legendary treasure — it's real!
+
+# -------------------------------------------------------------------
+# NPCs
+# -------------------------------------------------------------------
+npcs:
+  skeleton:
+    name: "Captain Bones"
+    description: >-
+      A skeleton in a tattered pirate coat, slumped against the
+      railing. A rusty cutlass rests across its bony knees. Its
+      jaw hangs open in a permanent grin and two faintly glowing
+      pinpricks of light stare out from the empty eye sockets.
+      It doesn't seem entirely dead.
+    start_room: forecastle
+    allowed_rooms:
+      - forecastle
+    dialogue:
+      - '"Arr, still here are ye? Thought the dark would''ve got you by now."'
+      - '"The sea took me crew, the cave took me ship, and time took me skin. But I''ve still got me wits!"'
+      - '"Back in me day we didn''t have fancy electric torches. We had LANTERNS. And we were GRATEFUL."'
+      - '"Hundred years I been sat here. Me backside''s gone numb. Well, more numb than usual."'
+      - '"You want the treasure? Ha! Better pirates than you have tried, boy."'
+    idle_texts:
+      - "Captain Bones clicks his jaw thoughtfully."
+      - "Captain Bones adjusts his tattered hat with a bony finger."
+      - "Captain Bones taps his cutlass on the deck, rattling gently."
+      - "Captain Bones stares at the cave wall as if watching the horizon."
+
+  parrot:
+    name: "Mr Squawks"
+    description: >-
+      A moth-eaten parrot with patchy green feathers and one good
+      eye. It clings to a beam overhead, tilting its head and
+      watching you with suspicious intelligence. A small brass
+      tag on its leg reads "MR SQUAWKS".
+    start_room: galley
+    allowed_rooms:
+      - galley
+      - main_deck
+      - forecastle
+    dialogue:
+      - '"BRAAAWK! Pieces of eight! Pieces of eight!"'
+      - '"Polly wants a... wait, what year is it? BRAAAWK!"'
+      - '"Dead men tell no tales! Except the captain. He won''t shut up."'
+      - '"BRAAAWK! Turn back! Turn back! ...Nah, just kidding."'
+      - '"The treasure is... THE TREASURE IS... I forgot. BRAAAWK!"'
+    idle_texts:
+      - "Mr Squawks ruffles his tatty feathers."
+      - "The parrot eyes you sideways and mutters something rude."
+      - "Mr Squawks pecks at a barnacle on the wall."
+      - "The parrot flaps to a new perch, sending dust everywhere."
+
+# -------------------------------------------------------------------
+# Triggers
+# -------------------------------------------------------------------
+# Triggers are checked in order; first match wins.
+
+triggers:
+  # -- Captain's cabin: block north until key is used --
+
+  - id: cabin_door_block
+    event: go
+    direction: north
+    conditions:
+      - !in_room main_deck
+      - !flag_unset cabin_unlocked
+    effects:
+      - !print >-
+          The heavy door to the captain's cabin is locked tight.
+          A rusty iron lock holds it shut. You'll need a key.
+
+  - id: use_key_cabin
+    event: use
+    target: key
+    conditions:
+      - !in_room main_deck
+      - !has_item rusty_key
+      - !flag_unset cabin_unlocked
+    effects:
+      - !set_flag cabin_unlocked
+      - !bell ~
+      - !print >-
+          You jam the rusty key into the lock and twist hard. For a
+          moment nothing happens — then with a grinding screech the
+          mechanism turns. The lock falls to the deck with a clatter
+          and the door swings open, releasing a gust of stale air.
+          {exits:The way north to the captain's cabin is now open.}
+
+  - id: use_key_generic
+    event: use
+    target: key
+    conditions:
+      - !has_item rusty_key
+    effects:
+      - !print "You try the key but there's nothing to use it on here."
+
+  # -- Cargo hold: use lantern to light it --
+
+  - id: use_lantern_hold
+    event: use
+    target: lantern
+    conditions:
+      - !in_room cargo_hold
+      - !has_item lantern
+      - !flag_unset cargo_lit
+    effects:
+      - !set_flag cargo_lit
+      - !bell ~
+      - !add_item
+        room: cargo_hold
+        item: treasure
+      - !print >-
+          You strike the flint and the lantern sputters to life,
+          casting a warm golden glow across the hold. As the shadows
+          retreat you see it — half-buried under a rotting sail in
+          the far corner — {item:the captain's treasure chest}, bound
+          in brass and stamped with a skull! Above it, a heavy iron
+          hatch is set into the ceiling.
+
+  - id: use_lantern_generic
+    event: use
+    target: lantern
+    conditions:
+      - !has_item lantern
+    effects:
+      - !print >-
+          The lantern flickers steadily. You don't really need it
+          here — there's enough light already.
+
+  # -- Escape: use hatch with treasure = win --
+
+  - id: escape_with_treasure
+    event: use
+    target: hatch
+    conditions:
+      - !in_room cargo_hold
+      - !has_item treasure
+      - !flag_set cargo_lit
+    effects:
+      - !win >-
+          You heave at the iron hatch above you. Rust flakes rain
+          down but with a mighty shove it bursts open. Daylight
+          floods in — the hatch leads up through the rocks above
+          the ship!
+
+
+          You haul the treasure chest through the hatch and scramble
+          out after it. The wind hits your face and you can hear the
+          sea rushing into the cave below. The tide is turning, water
+          already swirling around the hull.
+
+
+          You scramble over the rocks, dragging the chest behind you,
+          and burst out into the afternoon sun just as the cave fills
+          with the roar of the incoming tide.
+
+
+          You did it. Captain Blackwood's treasure is yours. The other
+          kids are never going to believe this.
+
+  - id: hatch_no_treasure
+    event: use
+    target: hatch
+    conditions:
+      - !in_room cargo_hold
+      - !flag_set cargo_lit
+    effects:
+      - !print >-
+          You push at the iron hatch. It shifts a little — you reckon
+          you could force it open. But you haven't got the treasure
+          yet! You're not leaving empty-handed.
+
+  - id: hatch_dark
+    event: use
+    target: hatch
+    conditions:
+      - !in_room cargo_hold
+      - !flag_unset cargo_lit
+    effects:
+      - !print "You grope around in the darkness but can't find anything."
+
+  # -- Skeleton riddle --
+
+  - id: talk_skeleton_riddle
+    event: talk_to
+    target: skeleton
+    conditions:
+      - !flag_unset riddle_solved
+    effects:
+      - !start_riddle skeleton_riddle
+
+  - id: talk_bones_riddle
+    event: talk_to
+    target: bones
+    conditions:
+      - !flag_unset riddle_solved
+    effects:
+      - !start_riddle skeleton_riddle
+
+  - id: talk_captain_riddle
+    event: talk_to
+    target: captain
+    conditions:
+      - !in_room forecastle
+      - !flag_unset riddle_solved
+    effects:
+      - !start_riddle skeleton_riddle
+
+  # -- Attack skeleton (he's already dead!) --
+
+  - id: attack_skeleton
+    event: attack
+    target: skeleton
+    effects:
+      - !print >-
+          You take a swing at Captain Bones. Your fist passes clean
+          between his ribs and out the other side. The skeleton throws
+          back his skull and lets out a rattling laugh.
+          {dialogue:"AHAHAHARR! You can't hurt me, boy — I'm ALREADY DEAD!"}
+          He slaps his kneecap and it pops off, bouncing across the
+          deck. He calmly picks it up and clicks it back into place.
+
+  - id: attack_bones
+    event: attack
+    target: bones
+    effects:
+      - !print >-
+          You take a swing at Captain Bones. Your fist passes clean
+          between his ribs and out the other side. The skeleton throws
+          back his skull and lets out a rattling laugh.
+          {dialogue:"AHAHAHARR! You can't hurt me, boy — I'm ALREADY DEAD!"}
+          He slaps his kneecap and it pops off, bouncing across the
+          deck. He calmly picks it up and clicks it back into place.
+
+  - id: attack_captain_forecastle
+    event: attack
+    target: captain
+    conditions:
+      - !in_room forecastle
+    effects:
+      - !print >-
+          You take a swing at Captain Bones. Your fist passes clean
+          between his ribs and out the other side. The skeleton throws
+          back his skull and lets out a rattling laugh.
+          {dialogue:"AHAHAHARR! You can't hurt me, boy — I'm ALREADY DEAD!"}
+          He slaps his kneecap and it pops off, bouncing across the
+          deck. He calmly picks it up and clicks it back into place.
+
+  # -- Attack parrot --
+
+  - id: attack_parrot
+    event: attack
+    target: parrot
+    effects:
+      - !print >-
+          You lunge at the parrot. Mr Squawks flaps easily out of
+          reach, showering you with dusty feathers.
+          {dialogue:"BRAAAWK! MUTINY! MUTINY!"} he shrieks from a high
+          beam, then adds in a quieter voice: {dialogue:"Rude."}
+
+  - id: attack_squawks
+    event: attack
+    target: squawks
+    effects:
+      - !print >-
+          You lunge at the parrot. Mr Squawks flaps easily out of
+          reach, showering you with dusty feathers.
+          {dialogue:"BRAAAWK! MUTINY! MUTINY!"} he shrieks from a high
+          beam, then adds in a quieter voice: {dialogue:"Rude."}
+
+  # -- Pickup treasure bell --
+
+  - id: treasure_pickup_bell
+    event: pickup
+    target: treasure
+    effects:
+      - !bell ~
+
+# -------------------------------------------------------------------
+# Riddles
+# -------------------------------------------------------------------
+riddles:
+  skeleton_riddle:
+    npc: skeleton
+    intro: >-
+      The pinpricks of light in Captain Bones' eye sockets flare
+      brighter. His jaw clacks open and shut, and then he speaks
+      in a voice like wind through rigging.
+      {dialogue:"So, you want the light, do ye? I've got a lantern —
+      last one on this ship. But I'll not hand it over to just anyone.
+      Answer me riddle and it's yours. Get it wrong... well, let's
+      just say I could use the company. AHAHAHARR!"}
+    questions:
+      - question: |
+          "I have cities, but no houses.
+            I have mountains, but no trees.
+            I have water, but no fish.
+            What am I?"
+        answer: map
+    correct_response: >-
+      {dialogue:"Well blow me down..." Captain Bones rattles grudgingly.}
+    win_text: >-
+      Captain Bones reaches inside his tattered coat with a bony
+      hand and pulls out {item:a battered ship's lantern}. He sets
+      it on the deck with a clatter.
+
+
+      {dialogue:"A deal's a deal. Take the lantern and be gone with
+      ye. But mind the dark down below — the cargo hold swallowed
+      better sailors than you."} He slumps back against the railing
+      and the light in his eyes dims to a faint glow.
+    win_effects:
+      - !set_flag riddle_solved
+      - !add_item
+        room: forecastle
+        item: lantern
+    lose_text: >-
+      {dialogue:"WRONG!"} Captain Bones' jaw drops open in a terrible
+      grin. {dialogue:"Wrong answer, boy. Looks like you're staying
+      here with old Captain Bones. Forever. AHAHAHARR!"}
+
+
+      A cold wind howls through the ship. The faint lights in the
+      skeleton's eyes flare bright — then everything goes dark.
+    lose_hint: >-
+      Captain Bones got the better of you. Think about what every
+      pirate needs to find buried treasure — something you'd draw
+      on parchment with an X on it.
